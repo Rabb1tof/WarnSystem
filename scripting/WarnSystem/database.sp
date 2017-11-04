@@ -1,167 +1,183 @@
-Handle g_hDatabase;
+Database g_hDatabase;
 
-public void InitializeDatabase() { SQL_TConnect(SQL_OnConnect, "warn"); }
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER(12) NOT NULL PRIMARY KEY AUTOINCREMENT, target VARCHAR(128) NOT NULL default '', targetid VARCHAR(32) NOT NULL default '', admin VARCHAR(128) NOT NULL default '', adminid VARCHAR(32) NOT NULL default '', reason VARCHAR(64) NOT NULL default '', time INTEGER(12) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0)";
+	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, target VARCHAR(128) NOT NULL default '', targetid VARCHAR(32) NOT NULL default '', admin VARCHAR(128) NOT NULL default '', adminid VARCHAR(32) NOT NULL default '', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci";
+	g_sSQL_LoadPlayerData[] = "SELECT * FROM WarnSystem WHERE targetid='%s' AND expired != '1';"
+	g_sSQL_WarnPlayer[] = "INSERT INTO WarnSystem (target, targetid, admin, adminid, reason, time, expired) VALUES ('%s', '%s', '%s', '%s', '%s', '%i', '0');"
+	g_sSQL_DeleteWarns[] = "DELETE FROM WarnSystem WHERE targetid = '%s';";
+	g_sSQL_SetExpired[] = "UPDATE WarnSystem SET expired = '1' WHERE targetid = '%s';";
+	g_sSQL_SelectWarns[] = "SELECT * FROM WarnSystem WHERE targetid='%s' AND expired != '1' ORDER BY time DESC LIMIT 1;";
+	g_sSQL_UnwarnPlayer[] = "DELETE FROM WarnSystem WHERE time = '%i' AND targetid = '%s';";
+	g_sClientName[MAXPLAYERS+1][MAX_NAME_LENGTH];
+	g_sSteamID[MAXPLAYERS+1][32];
+	g_sClientIP[MAXPLAYERS+1][32];
+int g_iWarnings[MAXPLAYERS+1];
 
-public void SQL_OnConnect(Handle owner, Handle hndl, const char[] sError, any data)
+public void InitializeDatabase()
 {
-	if (!hndl)
+	char sIdent[16], sError[256];
+	g_hDatabase = SQL_Connect("warn", false, sError, 256);
+	if(!g_hDatabase)
 	{
-		SetFailState("[WarnSystem] Database failure: %s", sError);
-		return;
+		g_hDatabase = SQLite_UseDatabase("warn", sError, 256);
+		if(!g_hDatabase)
+			SetFailState("[WarnSystem] Could not connect to the database (%s)", sError);
 	}
-	g_hDatabase = hndl;
-	char sBuffer[32];
-	SQL_GetDriverIdent(SQL_ReadDriver(g_hDatabase), sBuffer, sizeof(sBuffer));
-	bool UseMySQL = !strcmp(sBuffer, "mysql", false) ? true : false;
+
+	DBDriver hDatabaseDriver = g_hDatabase.Driver;
+	hDatabaseDriver.GetIdentifier(sIdent, sizeof(sIdent));
 	SQL_LockDatabase(g_hDatabase);
-	if (UseMySQL)
-		FormatEx(sBuffer, sizeof(sBuffer), "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\
-																					`target` VARCHAR(64),\
-																					`targetid` VARCHAR(32),\
-																					`admin` VARCHAR(64),\
-																					`adminid` VARCHAR(32),\
-																					`reason` VARCHAR(64),\
-																					`time` VARCHAR(64),\
-																					`expired` VARCHAR(1))");
-	else
-		FormatEx(sBuffer, sizeof(sBuffer), "CREATE TABLE IF NOT EXISTS WarnSystem (id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,\
-																				   target TEXT,\
-																				   targetid TEXT,\
-																				   admin TEXT,\
-																				   adminid TEXT,\
-																				   reason TEXT,\
-																				   time TEXT,\
-																				   expired TEXT);");
+	
+	switch(sIdent[0])
+	{
+		case 's': if(!SQL_FastQuery(g_hDatabase, g_sSQL_CreateTable_SQLite)) SetFailState("[WarnSystem] Connect_Database - could not create table in SQLite");
+		case 'm': if(!SQL_FastQuery(g_hDatabase, g_sSQL_CreateTable_MySQL)) SetFailState("[WarnSystem] Connect_Database - could not create table in MySQL");
+		default: SetFailState("[WarnSystem] Connect_Database - type database is invalid");
+	}
+	
 	SQL_UnlockDatabase(g_hDatabase);
-	SQL_TQuery(g_hDatabase, SQL_EmptyCallback, sBuffer);
-	if (UseMySQL)
+	g_hDatabase.SetCharset("utf8");
+}
+
+public void LoadPlayerData(iClient)
+{
+	if(!g_hDatabase)
+		SetFailState("[WarnSystem] LoadPlayerData - database is invalid");
+	
+	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
-		char dbQuery[16];
-		strcopy(dbQuery, sizeof(dbQuery), "SET NAMES 'utf8'");
-		SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
+		char sSteamID[32], dbQuery[128];
+		GetClientAuthId(iClient, AuthId_Steam2, sSteamID, sizeof(sSteamID));
+		GetClientName(iClient, g_sClientName[iClient], sizeof(g_sClientName[iClient]));
+		GetClientIP(iClient, g_sClientIP[iClient], sizeof(g_sClientIP[iClient]));
+		g_sSteamID[iClient] = sSteamID;
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_LoadPlayerData, sSteamID);
+		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
+		Fwd_OnClientLoaded(iClient);
 	}
 }
 
-public void SQL_CheckWarnings(Handle owner, Handle hndl, const char[] sError, int iClient)
+public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, int iClient)
 {
-	if (!hndl)
+	if (!hDatabaseResults)
 	{
-		InitializeDatabase();
+		LogError("[WarnSystem] SQL_LoadDataPlayer - error while working with data (%s)", sError);
 		return;
 	}
 	
-	if(sError[0])
+	if (hDatabaseResults.HasResults && hDatabaseResults.FetchRow())
 	{
-		LogError("SQL_CheckWarnings: %s", sError);
-		return;
-	}
-	
-	if (SQL_FetchRow(hndl))
-	{
-		int iWarnings = SQL_GetRowCount(hndl);
+		g_iWarnings = SQL_GetRowCount(hDatabaseResults);
 		if (g_bPrintToAdmins)
-			PrintToAdmins("\x03[WarnSystem] \x01%t", "warn_warnconnect", iWarnings);
+			PrintToAdmins("\x03[WarnSystem] \x01%t", "WarnConnect", g_iWarnings);
 	}
 }
 
-public void SQL_WarnPlayer(Handle owner, Handle hndl, const char[] sError, Handle hWarnData)
+public void WarnPlayer(int iClient, int iTarget, char sReason[64])
 {
-	if (!hndl)
+	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
 	{
-		InitializeDatabase();
-		return;
+		char dbQuery[255];
+		
+		Handle hWarnData = CreateDataPack();
+		if (iClient)
+			WritePackCell(hWarnData, GetClientUserId(iClient));
+		else
+			WritePackCell(hWarnData, 0);
+		WritePackCell(hWarnData, GetClientUserId(iTarget));
+		WritePackString(hWarnData, sReason);
+		ResetPack(hWarnData);
+		
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_LoadPlayerWarnings , g_sSteamID[iTarget]);
+		g_hDatabase.Query(SQL_WarnPlayer, dbQuery, hWarnData);
+		
+		PrintToChatAll("\x03[WarnSystem] \x01%t", "warn_warnplayer", iClient, iTarget, sReason);
+		
+		if(g_bWarnSound)
+			EmitSoundToClient(iTarget, g_sWarnSoundPath);
+		
+		Fwd_OnClientWarn(iClient, iTarget, sReason);
 	}
-	
-	if(sError[0])
+}
+
+public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hWarnData)
+{
+	if (!hDatabaseResults)
 	{
-		LogError("SQL_WarnPlayer: %s", sError);
+		LogError("[WarnSystem] SQL_WarnPlayer - error while working with data (%s)", sError);
 		return;
 	}
 	
 	int iClient, iTarget, iTime;
 	iTime = GetTime();
-	char sReason[64], sClientID[32], sTargetID[32], sClientNick[64], sTargetNick[64],
-		 sEscapedClientNick[64], sEscapedTargetNick[64], sEscapedReason[64], dbQuery[255];
+	char sReason[64], sEscapedClientNick[64], sEscapedTargetNick[64], sEscapedReason[64], dbQuery[255];
 	
 	if(hWarnData)
 	{
 		iClient = GetClientOfUserId(ReadPackCell(hWarnData));
 		iTarget = GetClientOfUserId(ReadPackCell(hWarnData));
 		ReadPackString(hWarnData, sReason, sizeof(sReason));
-		CloseHandle(hWarnData); 
+		CloseHandle(hWarnData);
 	}
 	
-	if (iClient)
-	{
-		GetClientAuthId(iClient, AuthId_Steam2, sClientID, sizeof(sClientID));
-		GetClientName(iClient, sClientNick, sizeof(sClientNick));
-		SQL_EscapeString(g_hDatabase, sClientNick, sEscapedClientNick, sizeof(sEscapedClientNick));
-	} else
-	{
-		strcopy(sClientID, sizeof(sClientID), "CONSOLE");
-		strcopy(sEscapedClientNick, sizeof(sEscapedClientNick), "CONSOLE");
-	}
-	
-	GetClientAuthId(iTarget, AuthId_Steam2, sTargetID, sizeof(sTargetID));
-	GetClientName(iTarget, sTargetNick, sizeof(sTargetNick));
-	SQL_EscapeString(g_hDatabase, sTargetNick, sEscapedTargetNick, sizeof(sEscapedTargetNick));
+	SQL_EscapeString(g_hDatabase, g_sClientName[iTarget], sEscapedTargetNick, sizeof(sEscapedTargetNick));
 	SQL_EscapeString(g_hDatabase, sReason, sEscapedReason, sizeof(sEscapedReason));
 	
-	if (SQL_FetchRow(hndl))
+	++g_iWarnings[iTarget];
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, sEscapedTargetNick, g_sSteamID[iTarget], sEscapedClientNick, g_sSteamID[iClient], sEscapedReason, iTime);
+	g_hDatabase.FastQuery(dbQuery);
+	
+	if (hDatabaseResults.FetchRow())
 	{
-		int iWarnings = SQL_GetRowCount(hndl);
-		++iWarnings;
-		
-		FormatEx(dbQuery, sizeof(dbQuery), "INSERT INTO WarnSystem (target, targetid, admin, adminid, reason, time, expired) VALUES ('%s', '%s', '%s', '%s', '%s', '%i', '0')", sEscapedTargetNick, sTargetID, sEscapedClientNick, sClientID, sEscapedReason, iTime);
-		SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
-		
-		if (iWarnings >= g_iMaxWarns)
+		if (g_iWarnings >= g_iMaxWarns)
 		{
 			if(g_bResetWarnings)
-			{
-				FormatEx(dbQuery, sizeof(dbQuery), "DELETE FROM WarnSystem WHERE targetid = '%s'", sTargetID);
-				SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
-			}
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_sSteamID[iTarget]);
 			else
-			{
-				FormatEx(dbQuery, sizeof(dbQuery), "UPDATE WarnSystem SET expired = '1' WHERE targetid = '%s'", sTargetID);
-				SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
-			}
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_sSteamID[iTarget]);
+			g_hDatabase.FastQuery(dbQuery);
 			
 			if(g_bLogWarnings)
-			{
-				char sTargetIP[32], sClientIP[32];
-				GetClientIP(iTarget, sTargetIP, sizeof(sTargetIP));
-				GetClientIP(iClient, sClientIP, sizeof(sClientIP));
-				LogWarnings("[WarnSystem] %t", "warn_warn_log", iClient, sClientID, sClientIP, iTarget, sTargetID, sTargetIP, sReason);
-			}
+				LogWarnings("[WarnSystem] %t", "warn_warn_log", iClient, g_sSteamID[iClient], g_sClientIP[iClient], iTarget, g_sSteamID[iTarget], g_sClientIP[iTarget], sReason);
+			
 			PunishPlayerOnMaxWarns(iTarget, sReason);
 		}
-	} else
-	{
-		FormatEx(dbQuery, sizeof(dbQuery), "INSERT INTO WarnSystem (target, targetid, admin, adminid, reason, time, expired) VALUES ('%s', '%s', '%s', '%s', '%s', '%i', '0')", sTargetNick, sTargetID, sClientNick, sClientID, sReason, iTime);
-		SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
 	}
 	
 	PunishPlayer(iTarget, sReason);
 }
 
-public void SQL_UnWarnPlayer(Handle owner, Handle hndl, const char[] sError, Handle hUnwarnData)
+public void UnWarnPlayer(int iClient, int iTarget, char sReason[64])
 {
-	if (!hndl)
+	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
 	{
-		InitializeDatabase();
+		char dbQuery[255];
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_sSteamID[iTarget]);
+		
+		Handle hUnwarnData = CreateDataPack();
+		if (iClient)
+			WritePackCell(hUnwarnData, GetClientUserId(iClient));
+		else
+			WritePackCell(hUnwarnData, 0);
+		WritePackCell(hUnwarnData, GetClientUserId(iTarget));
+		WritePackString(hUnwarnData, sSteamID);
+		WritePackString(hUnwarnData, sReason);
+		ResetPack(hUnwarnData);
+		
+		g_hDatabase.Query(SQL_UnWarnPlayer, dbQuery, hUnwarnData);
+	}
+}
+
+public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hUnwarnData)
+{
+	if (!hDatabaseResults)
+	{
+		LogError("[WarnSystem] SQL_UnWarnPlayer - error while working with data (%s)", sError);
 		return;
 	}
 	
-	if(sError[0])
-	{
-		LogError("SQL_UnWarnPlayer: %s", sError);
-		return;
-	}
-	
+	char sReason[64], dbQuery[255];
 	int iClient, iTarget;
-	char sTargetID[32], sReason[32], dbQuery[255];
 	
 	if(hUnwarnData)
 	{
@@ -172,30 +188,17 @@ public void SQL_UnWarnPlayer(Handle owner, Handle hndl, const char[] sError, Han
 		CloseHandle(hUnwarnData); 
 	}
 	
-	if (SQL_FetchRow(hndl))
+	if (hDatabaseResults.FetchRow())
 	{
-		char sTime[64];
-		SQL_FetchString(hndl, 6, sTime, sizeof(sTime));
+		int iTime;
+		hDatabaseResults.FetchInt(6, iTime);
 		
-		FormatEx(dbQuery, sizeof(dbQuery), "DELETE FROM WarnSystem WHERE time = '%s' AND targetid = '%s'", sTime, sTargetID);
-		SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
-		PrintToChatAll("\x03[WarnSystem] \x01", "%t", "warn_unwarn_player", iTarget, sReason);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iTime, g_sSteamID[iTarget]);
+		g_hDatabase.FastQuery(dbQuery);
+		PrintToChatAll("\x03[WarnSystem] \x01", "%t", "warn_unwarn_player", iClient, iTarget, sReason);
 		
 		if(g_bLogWarnings)
-		{
-			char sClientID[32], sClientIP[32], sTargetIP[32];
-			if (iClient)
-			{
-				GetClientAuthId(iClient, AuthId_Steam2, sClientID, sizeof(sClientID));
-				GetClientIP(iClient, sClientIP, sizeof(sClientIP));
-			} else
-			{
-				strcopy(sClientID, sizeof(sClientID), "CONSOLE");
-				strcopy(sClientIP, sizeof(sClientIP), "Unknown");
-			}
-			GetClientIP(iTarget, sTargetIP, sizeof(sTargetIP));
-			LogWarnings("[WarnSystem] %t", "warn_unwarn_log", iClient, sClientID, sClientIP, iTarget, sTargetID, sTargetIP, sReason);
-		}
+			LogWarnings("[WarnSystem] %t", "warn_unwarn_log", iClient, g_sSteamID[iClient], g_sClientIP[iClient], iTarget, g_sSteamID[iTarget], g_sClientIP[iTarget], sReason);
 	} else
 		PrintToChat(iClient, "\x03[WarnSystem] \x01%t", "warn_notwarned", iTarget);
 }
@@ -229,7 +232,7 @@ public void SQL_ResetWarnPlayer(Handle owner, Handle hndl, const char[] sError, 
 	if (SQL_FetchRow(hndl))
 	{
 		FormatEx(dbQuery, sizeof(dbQuery), "DELETE FROM WarnSystem WHERE targetid = '%s'", sTargetID);
-		SQL_TQuery(g_hDatabase, SQL_EmptyCallback, dbQuery);
+		g_hDatabase.FastQuery(dbQuery);
 		
 		PrintToChatAll("\x03[WarnSystem] \x01", "%t", "warn_resetplayer", iTarget, sReason);
 		
@@ -311,10 +314,4 @@ public void SQL_CheckPlayer(Handle owner, Handle hndl, const char[] sError, Hand
 		
 		PrintToConsole(iClient, "%-15s %-16s %-22s %-33s %-3s", sNickname, sAdmin, sDate, sReason, sExpired);
 	}
-}
-		
-public void SQL_EmptyCallback(Handle owner, Handle hndl, const char[] sError, Handle hWarnData)
-{
-	if(sError[0])
-		LogError("Query failure: %s", sError);
 }

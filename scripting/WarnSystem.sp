@@ -7,7 +7,7 @@
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
-bool g_bUseSourcebans;
+bool g_bUseSourcebans, g_bUseMaterialAdmin;
 
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/database.sp"
@@ -42,6 +42,9 @@ public void OnPluginStart()
 	Handle topmenu;
 	if (LibraryExists("adminmenu") && (topmenu = GetAdminTopMenu()))
 		InitializeMenu(topmenu);
+	
+	strcopy(g_sSteamID[0], sizeof(g_sSteamID[0], "CONSOLE");
+	strcopy(g_sClientIP[0], sizeof(g_sClientIP[0]), "Unknown");
 }
 
 public void OnAllPluginsLoaded()
@@ -72,17 +75,7 @@ public void OnMapStart()
 
 public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
 
-public void OnClientPostAdminCheck(int iClient)
-{
-	if(!IsFakeClient(iClient))
-	{
-		char sSteamID[32], dbQuery[64];
-		GetClientAuthId(iClient, AuthId_Steam2, sSteamID, sizeof(sSteamID));
-		FormatEx(dbQuery, sizeof(dbQuery),  "SELECT * FROM WarnSystem WHERE targetid='%s' AND expired != '1'", sSteamID);
-		SQL_TQuery(g_hDatabase, SQL_CheckWarnings, dbQuery, iClient);
-		Fwd_OnClientLoaded(iClient);
-	}
-}
+public void OnClientPostAdminCheck(int iClient) {LoadPlayerData(iClient);}
 
 public void PrintToAdmins(char[] sFormat, any ...)
 {
@@ -102,44 +95,6 @@ public void LogWarnings(const char[] sFormat, any ...)
 	char sBuffer[255];
 	VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 	LogToFileEx(g_sLogPath, "%s", sBuffer);
-}
-
-public void WarnPlayer(int iClient, int iTarget, char sReason[64])
-{
-	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
-	{
-		char sTSteamID[32], dbQuery[128];
-		GetClientAuthId(iTarget, AuthId_Steam2, sTSteamID, sizeof(sTSteamID));
-		Handle hWarnData = CreateDataPack();
-		WritePackCell(hWarnData, GetClientUserId(iTarget));
-		WritePackString(hWarnData, sReason);
-		ResetPack(hWarnData);
-		FormatEx(dbQuery, sizeof(dbQuery),  "SELECT * FROM WarnSystem WHERE targetid='%s' AND expired != '1'", sTSteamID);
-		SQL_TQuery(g_hDatabase, SQL_WarnPlayer, dbQuery, hWarnData);
-		PrintToChatAll("\x03[WarnSystem] \x01", "%t", "warn_warnplayer", iClient, iTarget, sReason);
-		if(g_bWarnSound)
-			EmitSoundToClient(iTarget, g_sWarnSoundPath);
-		Fwd_OnClientWarn(iClient, iTarget, sReason);
-	}
-}
-
-public void UnWarnPlayer(int iClient, int iTarget, char sReason[64]){
-	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
-	{
-		char sSteamID[32], dbQuery[128];
-		GetClientAuthId(iTarget, AuthId_Steam2, sSteamID, sizeof(sSteamID));
-		FormatEx(dbQuery, sizeof(dbQuery),  "SELECT * FROM WarnSystem WHERE targetid='%s' AND expired != '1' ORDER BY time DESC LIMIT 1", sSteamID);
-		Handle hUnwarnData = CreateDataPack();
-		if (iClient)
-			WritePackCell(hUnwarnData, GetClientUserId(iClient));
-		else
-			WritePackCell(hUnwarnData, 0);
-		WritePackCell(hUnwarnData, GetClientUserId(iTarget));
-		WritePackString(hUnwarnData, sSteamID);
-		WritePackString(hUnwarnData, sReason);
-		ResetPack(hUnwarnData);
-		SQL_TQuery(g_hDatabase, SQL_UnWarnPlayer, dbQuery, hUnwarnData);
-	}
 }
 
 public void ResetPlayerWarns(int iClient, int iTarget, char sReason[64]){
