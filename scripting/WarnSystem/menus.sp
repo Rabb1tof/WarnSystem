@@ -16,6 +16,7 @@ public void InitializeMenu(Handle topmenu)
 	AddToTopMenu(g_hAdminMenu, "sm_unwarn", TopMenuObject_Item, AdminMenu_UnWarn, WarnCategory, "sm_unwarn", ADMFLAG_BAN);
 	AddToTopMenu(g_hAdminMenu, "sm_resetwarn", TopMenuObject_Item, AdminMenu_ResetWarn, WarnCategory, "sm_resetwarn", ADMFLAG_BAN);
 	AddToTopMenu(g_hAdminMenu, "sm_checkwarn", TopMenuObject_Item, AdminMenu_CheckWarn, WarnCategory, "sm_checkwarn", ADMFLAG_BAN);
+	AddToTopMenu(g_hAdminMenu, "sm_warns", TopMenuObject_Item, AdminMenu_Warns, WarnCategory, "sm_warns", ADMFLAG_GENERIC);
 }
 
 public void Handle_AdminCategory(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
@@ -93,6 +94,21 @@ public void AdminMenu_CheckWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 	}
 }
 
+public void AdminMenu_Warns(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
+{
+	switch(action)
+	{
+		case TopMenuAction_DisplayOption:
+		{
+			FormatEx(buffer, maxlength, "%T", "WarnsAdminmenuTitle", param);
+		}
+		case TopMenuAction_SelectOption:
+		{
+			DisplayWarnsTargetMenu(param);
+		}
+	}
+}
+
 public void DisplayWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_Warn, MENU_ACTIONS_ALL);
@@ -124,6 +140,15 @@ public void DisplayCheckWarnTargetMenu(int iClient)
 {
 	Menu hMenu = new Menu(MenuHandler_CheckWarn, MENU_ACTIONS_ALL);
 	SetMenuTitle(hMenu, "%T", "CheckwarnTargetMenuTitle", iClient);
+	SetMenuExitBackButton(hMenu, true);
+	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
+	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
+}
+
+public void DisplayWarnsTargetMenu(int iClient) 
+{
+	Menu hMenu = new Menu(MenuHandler_Warns, MENU_ACTIONS_ALL);
+	SetMenuTitle(hMenu, "%T", "WarnsTargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -255,6 +280,36 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_canttarget");
 			else
 				CheckPlayerWarns(param1, iTarget);
+		}
+		case MenuAction_Cancel:
+		{
+			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
+			{
+				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
+			}
+		}
+		case MenuAction_End:
+		{
+			CloseHandle(menu);
+		}
+	}
+}
+
+public int MenuHandler_Warns(Menu menu, MenuAction action, int param1, int param2) 
+{
+	switch(action)
+	{
+		case MenuAction_Select:
+		{
+			char sInfo[64];
+			int iTarget;
+			
+			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+			iTarget = GetClientOfUserId(StringToInt(sInfo));
+
+			if (!iTarget)
+				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
+			else PrintToChat(param1, "%t", iTarget, g_iWarnings[iTarget]);
 		}
 		case MenuAction_Cancel:
 		{

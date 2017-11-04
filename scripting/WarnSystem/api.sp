@@ -24,8 +24,7 @@ public int Native_WarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iLen;
 	GetNativeStringLength(2, iLen);
-	if (!iLen)
-		return;
+	if (!iLen) return;
 	int iClient = GetNativeCell(1);
 	char sReason[64];
 	GetNativeString(2, sReason, iLen);
@@ -36,8 +35,7 @@ public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iLen;
 	GetNativeStringLength(2, iLen);
-	if (!iLen)
-		return;
+	if (!iLen) return;
 	int iClient = GetNativeCell(1);
 	char sReason[64];
 	GetNativeString(2, sReason, iLen);
@@ -48,8 +46,7 @@ public int Native_ResetWarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iLen;
 	GetNativeStringLength(2, iLen);
-	if (!iLen)
-		return;
+	if (!iLen) return;
 	int iClient = GetNativeCell(1);
 	char sReason[64];
 	GetNativeString(2, sReason, iLen);
@@ -63,11 +60,11 @@ void Fwd_OnClientLoaded(int iClient)
     Call_Finish();
 }
 
-void Fwd_OnClientWarn(int iClient, int iTarget, char sReason[64])
+void Fwd_OnClientWarn(int iAdmin, int iClient, char sReason[64])
 {
-    Call_StartForward(g_hGFwd_OnClientWarn);
-    Call_PushCell(iClient);
-	Call_PushCell(iTarget);
+	Call_StartForward(g_hGFwd_OnClientWarn);
+	Call_PushCell(iAdmin);
+	Call_PushCell(iClient);
 	Call_PushString(sReason);
 	Call_Finish();
 }

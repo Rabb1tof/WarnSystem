@@ -4,6 +4,7 @@ public void InitializeCommands()
 	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, ADMFLAG_BAN);
 	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, ADMFLAG_BAN);
 	RegAdminCmd("sm_resetwarn", Command_WarnReset, ADMFLAG_BAN);
+	RegConsoleCmd("sm_warns", Command_Warns);
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)
@@ -84,5 +85,24 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 	GetCmdArg(1, sArgument, sizeof(sArgument));
 	int iTarget = FindTarget(iClient, sArgument, true, true);
 	CheckPlayerWarns(iClient, iTarget);
+	return Plugin_Handled;
+}
+
+public Action Command_Warns(int iClient, int iArgs)
+{
+	if (!iClient)
+	{
+		PrintToServer("[WarnSystem] In-game command only!");
+		return Plugin_Handled;
+	}
+	if (!iArgs)
+	{
+		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments3");
+		return Plugin_Handled;
+	}
+	char sArgument[32];
+	GetCmdArg(1, sArgument, sizeof(sArgument));
+	int iTarget = FindTarget(iClient, sArgument, true, true);
+	PrintToChat(iClient, "%t", g_iWarnings[iTarget]);
 	return Plugin_Handled;
 }

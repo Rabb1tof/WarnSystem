@@ -7,7 +7,8 @@
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
-bool g_bUseSourcebans, g_bUseMaterialAdmin;
+bool g_bUseSourcebans;
+//I'll add support of more plugins
 
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/database.sp"
@@ -43,8 +44,8 @@ public void OnPluginStart()
 	if (LibraryExists("adminmenu") && (topmenu = GetAdminTopMenu()))
 		InitializeMenu(topmenu);
 	
-	strcopy(g_sSteamID[0], sizeof(g_sSteamID[0], "CONSOLE");
-	strcopy(g_sClientIP[0], sizeof(g_sClientIP[0]), "Unknown");
+	strcopy(g_sSteamID[0], 32, "CONSOLE");
+	strcopy(g_sClientIP[0], 32, "localhost");
 }
 
 public void OnAllPluginsLoaded()
@@ -75,7 +76,7 @@ public void OnMapStart()
 
 public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
 
-public void OnClientPostAdminCheck(int iClient) {LoadPlayerData(iClient);}
+public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
 
 public void PrintToAdmins(char[] sFormat, any ...)
 {
@@ -95,39 +96,6 @@ public void LogWarnings(const char[] sFormat, any ...)
 	char sBuffer[255];
 	VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 	LogToFileEx(g_sLogPath, "%s", sBuffer);
-}
-
-public void ResetPlayerWarns(int iClient, int iTarget, char sReason[64]){
-	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
-	{
-		char sSteamID[32], dbQuery[128];
-		GetClientAuthId(iTarget, AuthId_Steam2, sSteamID, sizeof(sSteamID));
-		FormatEx(dbQuery, sizeof(dbQuery),  "SELECT * FROM WarnSystem WHERE targetid='%s'", sSteamID);
-		Handle hResetWarnData = CreateDataPack(); 
-		if (iClient)
-			WritePackCell(hResetWarnData, GetClientUserId(iClient));
-		else
-			WritePackCell(hResetWarnData, 0);
-		WritePackCell(hResetWarnData, GetClientUserId(iTarget));
-		WritePackString(hResetWarnData, sSteamID);
-		WritePackString(hResetWarnData, sReason);
-		ResetPack(hResetWarnData);
-		SQL_TQuery(g_hDatabase, SQL_ResetWarnPlayer, dbQuery, hResetWarnData);
-	}
-}
-
-public void CheckPlayerWarns(int iClient, int iTarget){
-	if (iTarget && IsClientInGame(iTarget) && !IsFakeClient(iTarget))
-	{
-		char sSteamID[32], dbQuery[128];
-		GetClientAuthId(iTarget, AuthId_Steam2, sSteamID, sizeof(sSteamID));
-		FormatEx(dbQuery, sizeof(dbQuery),  "SELECT * FROM WarnSystem WHERE targetid='%s'", sSteamID);
-		Handle hCheckData = CreateDataPack(); 
-		WritePackCell(hCheckData, GetClientUserId(iClient));
-		WritePackCell(hCheckData, GetClientUserId(iTarget));
-		ResetPack(hCheckData);
-		SQL_TQuery(g_hDatabase, SQL_CheckPlayer, dbQuery, hCheckData);
-	}
 }
 
 public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
@@ -154,12 +122,12 @@ public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
 			}
 			default:
 			{
-				
+				LogError("[WarnSystem] ConVar sm_warn_maxpunishment contains incorrect value(%i)", g_iMaxPunishment);
 			}
 	}
 }
 
-public void PunishPlayer(int iClient, char sReason[64])
+public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iPunishment)
@@ -195,7 +163,7 @@ public void PunishPlayer(int iClient, char sReason[64])
 				char sBanReason[64];
 				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "warn_punish_ban", sReason);
 				if (g_bUseSourcebans)
-					SBBanPlayer(0, iClient, g_iBanLenght, sBanReason);
+					SBBanPlayer(iAdmin, iClient, g_iBanLenght, sBanReason);
 				else
 				{
 					char sKickReason[64];
@@ -205,7 +173,7 @@ public void PunishPlayer(int iClient, char sReason[64])
 			}
 			default:
 			{
-				
+				LogError("[WarnSystem] ConVar sm_warn_punishment contains incorrect value(%i)", g_iMaxPunishment);
 			}
 		}
 }
