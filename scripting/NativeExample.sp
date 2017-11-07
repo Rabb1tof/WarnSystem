@@ -17,7 +17,7 @@ public void OnPluginStart()
     RegConsoleCmd("sm_warnexample", Command_warnexample);
 }
 
-public Action Command_warnexample(int client, int args) 
+public Action Command_warnexample(int iClient, int args) 
 {
-    WarnSystem_Warn(client, "Bad boy");
+    WarnSystem_Warn(0, iClient, "Bad boy");
 }

@@ -1,17 +1,16 @@
 public void InitializeCommands()
 {
-	RegAdminCmd("sm_warn", Command_WarnPlayer, ADMFLAG_BAN);
-	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, ADMFLAG_BAN);
-	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, ADMFLAG_BAN);
-	RegAdminCmd("sm_resetwarn", Command_WarnReset, ADMFLAG_BAN);
-	RegConsoleCmd("sm_warns", Command_Warns);
+	RegAdminCmd("sm_warn", Command_WarnPlayer, WARNFLAG);
+	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, UNWARNFLAG);
+	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, CHECKWARNFLAG);
+	RegAdminCmd("sm_resetwarn", Command_WarnReset, RESETWARNSFLAG);
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)
 {
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments");
+		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_WarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -30,7 +29,7 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 {
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments2");
+		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_UnWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -49,12 +48,12 @@ public Action Command_WarnReset(int iClient, int iArgs)
 {
 	if(!g_bResetWarnings)
 	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01You don't have access to this command");
+		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "No Access");
 		return Plugin_Handled;
 	}
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments4");
+		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_ResetWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -73,36 +72,17 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 {
 	if (!iClient)
 	{
-		PrintToServer("[WarnSystem] In-game command only!");
+		PrintToServer("%t %t", "WS_Prefix", "Command is in-game only");
 		return Plugin_Handled;
 	}
 	if (!iArgs)
 	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments3");
+		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_CheckWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32];
 	GetCmdArg(1, sArgument, sizeof(sArgument));
 	int iTarget = FindTarget(iClient, sArgument, true, true);
 	CheckPlayerWarns(iClient, iTarget);
-	return Plugin_Handled;
-}
-
-public Action Command_Warns(int iClient, int iArgs)
-{
-	if (!iClient)
-	{
-		PrintToServer("[WarnSystem] In-game command only!");
-		return Plugin_Handled;
-	}
-	if (!iArgs)
-	{
-		ReplyToCommand(iClient, "\x03[WarnSystem] \x01%t", "warn_arguments3");
-		return Plugin_Handled;
-	}
-	char sArgument[32];
-	GetCmdArg(1, sArgument, sizeof(sArgument));
-	int iTarget = FindTarget(iClient, sArgument, true, true);
-	PrintToChat(iClient, "%t", g_iWarnings[iTarget]);
 	return Plugin_Handled;
 }

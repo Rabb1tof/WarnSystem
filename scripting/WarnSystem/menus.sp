@@ -10,13 +10,12 @@ public void InitializeMenu(Handle topmenu)
 	TopMenuObject WarnCategory = FindTopMenuCategory(g_hAdminMenu, "warnmenu");
 	
 	if (!WarnCategory)
-		WarnCategory = AddToTopMenu(g_hAdminMenu, "warnmenu", TopMenuObject_Category, Handle_AdminCategory, INVALID_TOPMENUOBJECT, "sm_warnmenu", ADMFLAG_BAN);
+		WarnCategory = AddToTopMenu(g_hAdminMenu, "warnmenu", TopMenuObject_Category, Handle_AdminCategory, INVALID_TOPMENUOBJECT, "sm_warnmenu", ADMINMENUFLAG);
 	
-	AddToTopMenu(g_hAdminMenu, "sm_warn", TopMenuObject_Item, AdminMenu_Warn, WarnCategory, "sm_warn", ADMFLAG_BAN);
-	AddToTopMenu(g_hAdminMenu, "sm_unwarn", TopMenuObject_Item, AdminMenu_UnWarn, WarnCategory, "sm_unwarn", ADMFLAG_BAN);
-	AddToTopMenu(g_hAdminMenu, "sm_resetwarn", TopMenuObject_Item, AdminMenu_ResetWarn, WarnCategory, "sm_resetwarn", ADMFLAG_BAN);
-	AddToTopMenu(g_hAdminMenu, "sm_checkwarn", TopMenuObject_Item, AdminMenu_CheckWarn, WarnCategory, "sm_checkwarn", ADMFLAG_BAN);
-	AddToTopMenu(g_hAdminMenu, "sm_warns", TopMenuObject_Item, AdminMenu_Warns, WarnCategory, "sm_warns", ADMFLAG_GENERIC);
+	AddToTopMenu(g_hAdminMenu, "sm_warn", TopMenuObject_Item, AdminMenu_Warn, WarnCategory, "sm_warn", WARNFLAG);
+	AddToTopMenu(g_hAdminMenu, "sm_unwarn", TopMenuObject_Item, AdminMenu_UnWarn, WarnCategory, "sm_unwarn", UNWARNFLAG);
+	AddToTopMenu(g_hAdminMenu, "sm_resetwarn", TopMenuObject_Item, AdminMenu_ResetWarn, WarnCategory, "sm_resetwarn", RESETWARNSFLAG);
+	AddToTopMenu(g_hAdminMenu, "sm_checkwarn", TopMenuObject_Item, AdminMenu_CheckWarn, WarnCategory, "sm_checkwarn", CHECKWARNFLAG);
 }
 
 public void Handle_AdminCategory(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
@@ -25,11 +24,11 @@ public void Handle_AdminCategory(Handle topmenu, TopMenuAction action, TopMenuOb
 	{
 		case TopMenuAction_DisplayTitle:
 		{
-			FormatEx(buffer, maxlength, "%T", "AdminMenuTitle", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuTitle", param);
 		}
 		case TopMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlength, "%T", "AdminMenuOption", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuOption", param);
 		}
 	}
 }
@@ -40,7 +39,7 @@ public void AdminMenu_Warn(Handle topmenu, TopMenuAction action, TopMenuObject o
 	{
 		case TopMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlength, "%T", "WarnAdminmenuTitle", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuWarnTitle", param);
 		}
 		case TopMenuAction_SelectOption:
 		{
@@ -55,7 +54,7 @@ public void AdminMenu_UnWarn(Handle topmenu, TopMenuAction action, TopMenuObject
 	{
 		case TopMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlength, "%T", "UnwarnAdminmenuTitle", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuUnWarnTitle", param);
 		}
 		case TopMenuAction_SelectOption:
 		{
@@ -70,7 +69,7 @@ public void AdminMenu_ResetWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 	{
 		case TopMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlength, "%T", "warn_resetwarn_adminmenu_title", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuResetWarnTitle", param);
 		}
 		case TopMenuAction_SelectOption:
 		{
@@ -85,7 +84,7 @@ public void AdminMenu_CheckWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 	{
 		case TopMenuAction_DisplayOption:
 		{
-			FormatEx(buffer, maxlength, "%T", "CheckwarnAdminmenuTitle", param);
+			FormatEx(buffer, maxlength, "%T", "WS_AdminMenuCheckWarnTitle", param);
 		}
 		case TopMenuAction_SelectOption:
 		{
@@ -94,25 +93,10 @@ public void AdminMenu_CheckWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 	}
 }
 
-public void AdminMenu_Warns(Handle topmenu, TopMenuAction action, TopMenuObject object_id, int param, char[] buffer, int maxlength)
-{
-	switch(action)
-	{
-		case TopMenuAction_DisplayOption:
-		{
-			FormatEx(buffer, maxlength, "%T", "WarnsAdminmenuTitle", param);
-		}
-		case TopMenuAction_SelectOption:
-		{
-			DisplayWarnsTargetMenu(param);
-		}
-	}
-}
-
 public void DisplayWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_Warn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "WarnTargetMenuTitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -121,7 +105,7 @@ public void DisplayWarnTargetMenu(int iClient)
 public void DisplayUnWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_UnWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "UnwarnTargetMenuTitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -130,7 +114,7 @@ public void DisplayUnWarnTargetMenu(int iClient)
 public void DisplayResetWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_ResetWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "warn_resetwarn_targetmenutitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -139,16 +123,7 @@ public void DisplayResetWarnTargetMenu(int iClient)
 public void DisplayCheckWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_CheckWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "CheckwarnTargetMenuTitle", iClient);
-	SetMenuExitBackButton(hMenu, true);
-	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
-	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
-}
-
-public void DisplayWarnsTargetMenu(int iClient) 
-{
-	Menu hMenu = new Menu(MenuHandler_Warns, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "WarnsTargetMenuTitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -167,9 +142,9 @@ public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2
 			iUserid = StringToInt(sInfo);
 
 			if (!(iTarget = GetClientOfUserId(iUserid)))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_canttarget");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iUserid;
@@ -203,9 +178,9 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 			iUserid = StringToInt(sInfo);
 
 			if (!(iTarget = GetClientOfUserId(iUserid)))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_canttarget");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iUserid;
@@ -239,9 +214,9 @@ public int MenuHandler_ResetWarn(Menu menu, MenuAction action, int param1, int p
 			iUserid = StringToInt(sInfo);
 
 			if (!(iTarget = GetClientOfUserId(iUserid)))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_canttarget");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iUserid;
@@ -275,41 +250,11 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 			iTarget = GetClientOfUserId(StringToInt(sInfo));
 
 			if (!iTarget)
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_canttarget");
+				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
 			else
 				CheckPlayerWarns(param1, iTarget);
-		}
-		case MenuAction_Cancel:
-		{
-			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
-			{
-				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
-			}
-		}
-		case MenuAction_End:
-		{
-			CloseHandle(menu);
-		}
-	}
-}
-
-public int MenuHandler_Warns(Menu menu, MenuAction action, int param1, int param2) 
-{
-	switch(action)
-	{
-		case MenuAction_Select:
-		{
-			char sInfo[64];
-			int iTarget;
-			
-			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			iTarget = GetClientOfUserId(StringToInt(sInfo));
-
-			if (!iTarget)
-				PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_notavailable");
-			else PrintToChat(param1, "%t", iTarget, g_iWarnings[iTarget]);
 		}
 		case MenuAction_Cancel:
 		{
@@ -330,7 +275,7 @@ public void DisplayWarnReasons(int iClient)
 	char sReason[64];
 	
 	Menu hMenu = new Menu(MenuHandler_PreformUnWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "warn_warn_reasontitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
 	Handle hFilePath = OpenFile(g_sPathWarnReasons, "rt");
@@ -353,7 +298,7 @@ public void DisplayUnWarnReasons(int iClient)
 	char sReason[64];
 	
 	Menu hMenu = new Menu(MenuHandler_PreformUnWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "warn_unwarn_reasontitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
 	Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
@@ -375,7 +320,7 @@ public void DisplayResetWarnReasons(int iClient)
 	char sReason[64];
 	
 	Menu hMenu = new Menu(MenuHandler_PreformResetWarn, MENU_ACTIONS_ALL);
-	SetMenuTitle(hMenu, "%T", "warn_resetwarn_reasontitle", iClient);
+	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
 	Handle hFilePath = OpenFile(g_sPathResetReasons, "rt");
@@ -473,8 +418,8 @@ public void BuildAgreement(int iClient)
 		return;
 	}
 	char sTitle[32], sAgree[32], sData[64];
-	FormatEx(sTitle, sizeof(sTitle), "[WarnSystem] %T", "warn_agreement_title", iClient);
-	FormatEx(sAgree, sizeof(sAgree), "%T", "warn_agreement_agree", iClient);
+	FormatEx(sTitle, sizeof(sTitle), "%T", "WS_AgreementTitle", iClient);
+	FormatEx(sAgree, sizeof(sAgree), "%T", "WS_AgreementAgree", iClient);
 	
 	Handle hMenu = CreatePanel();
 	SetPanelTitle(hMenu, sTitle);
@@ -495,7 +440,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 	{
 		case MenuAction_Select:
 		{
-			PrintToChat(param1, "\x03[WarnSystem] \x01%t", "warn_agreement_message");
+			CPrintToChat(param1, "%t %t", "WS_Prefix", "WS_AgreementMessage");
 			SetEntityMoveType(param1, MOVETYPE_WALK);
 		}
 		case MenuAction_End:
