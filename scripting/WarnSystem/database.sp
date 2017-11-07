@@ -1,7 +1,7 @@
 Database g_hDatabase;
 int g_iServerID = 0;
 
-char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER(12) NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER(12) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid INTEGER NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid INTEGER NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER NOT NULL default 0, expired INTEGER NOT NULL default 0);",
 	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, serverid int(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS WarnSystem_Servers (sid int(12) NOT NULL AUTO_INCREMENT, address VARCHAR(64) NOT NULL default '', PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_GetServerID[] = "SELECT sid FROM WarnSystem_Servers WHERE address = '%s';",
@@ -48,13 +48,13 @@ public void InitializeDatabase()
 
 public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
-	if(!hDatabaseResults || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
 }
 
 public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
-	if(!hDatabaseResults || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 		SetFailState("[WarnSystem] SQL_CreateTableServers: %s", sError);
 	GetServerID();
 }
@@ -75,7 +75,7 @@ public void GetServerID()
 
 public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
-	if (!hDatabaseResults || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_SelectServerID: %s", sError);
 		return;
@@ -95,7 +95,7 @@ public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
-	if (!hDatabaseResults || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_SetServerID: %s", sError);
 		return;
@@ -122,7 +122,7 @@ public void LoadPlayerData(int iClient)
 
 public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, int iClient)
 {
-	if (!hDatabaseResults || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_LoadDataPlayer - error while working with data (%s)", sError);
 		return;
@@ -139,7 +139,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
 		
@@ -164,7 +164,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 
 public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hWarnData)
 {
-	if (!hDatabaseResults)
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_WarnPlayer - error while working with data (%s)", sError);
 		return;
@@ -199,12 +199,12 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
 			g_hDatabase.Query(SQL_CheckError, dbQuery);
 			
-			if(g_bLogWarnings)
-				LogWarnings("%t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
-			
 			PunishPlayerOnMaxWarns(iClient, sReason);
 		}
 	}
+	
+	if(g_bLogWarnings)
+		LogWarnings("%t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	
 	WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
 	PunishPlayer(iAdmin, iClient, sReason);
@@ -212,7 +212,7 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -232,7 +232,7 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 
 public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hUnwarnData)
 {
-	if (!hDatabaseResults)
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_UnWarnPlayer - error while working with data (%s)", sError);
 		return;
@@ -267,7 +267,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -289,7 +289,7 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 
 public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hResetWarnData)
 {	
-	if (!hDatabaseResults)
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_ResetWarnPlayer - error while working with data (%s)", sError);
 		return;
@@ -320,8 +320,9 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
-public void CheckPlayerWarns(int iAdmin, int iClient){
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+public void CheckPlayerWarns(int iAdmin, int iClient)
+{
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
@@ -337,7 +338,7 @@ public void CheckPlayerWarns(int iAdmin, int iClient){
 
 public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hCheckData)
 {
-	if (!hDatabaseResults)
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_CheckPlayerWarns - error while working with data (%s)", sError);
 		return;

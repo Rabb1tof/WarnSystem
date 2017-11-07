@@ -1,5 +1,4 @@
 #pragma semicolon 1
-
 #include <morecolors>
 
 #undef REQUIRE_PLUGIN
