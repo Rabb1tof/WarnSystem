@@ -62,7 +62,6 @@ public void OnPluginStart()
 	if (LibraryExists("adminmenu") && (topmenu = GetAdminTopMenu()))
 		InitializeMenu(topmenu);
 	
-	strcopy(g_sSteamID[0], 32, "CONSOLE");
 	strcopy(g_sClientIP[0], 32, "localhost");
 }
 
@@ -153,9 +152,7 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 		switch (g_iPunishment)
 		{
 			case 1:
-			{
 				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
-			}
 			case 2:
 			{
 				SlapPlayer(iClient, g_iSlapDamage, true);
@@ -192,8 +189,6 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				}
 			}
 			default:
-			{
 				LogError("[WarnSystem] ConVar sm_warn_punishment contains incorrect value(%i)", g_iMaxPunishment);
-			}
 		}
 }

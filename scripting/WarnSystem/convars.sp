@@ -7,8 +7,6 @@ char g_sWarnSoundPath[PLATFORM_MAX_PATH];
 
 public void InitializeConVars()
 {
-	CreateConVar("sm_warn_version", "1.0", "WarnSystem Version", FCVAR_SPONLY|FCVAR_REPLICATED|FCVAR_NOTIFY|FCVAR_DONTRECORD);
-	
 	(g_hCvarResetWarnings = CreateConVar("sm_warn_resetwarnings", "0", "Reset warnings when they reach the max warnings: 0 - Keep warnings, 1 - Delete warnings", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_ResetWarnings);
 	(g_hCvarMaxWarns = CreateConVar("sm_warn_maxwarns", "3", "Max warnings before punishment", _, true, 1.0, true, 10.0)).AddChangeHook(ChangeCvar_MaxWarns);
 	(g_hCvarPunishment = CreateConVar("sm_warn_punishment", "4", "On warn: 1 - message player, 2 - slap player and message, 3 - slay player and message, 4 - Popup agreement and message, 5 - kick player with reason, 6 - ban player with reason", _, true, 1.0, true, 6.0)).AddChangeHook(ChangeCvar_Punishment);

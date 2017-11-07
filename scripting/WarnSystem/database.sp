@@ -1,23 +1,22 @@
 Database g_hDatabase;
 int g_iServerID = 0;
 
-char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER(12) NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid VARCHAR(32) NOT NULL default '', admin VARCHAR(128) NOT NULL default '', adminid VARCHAR(32) NOT NULL default '', reason VARCHAR(64) NOT NULL default '', time INTEGER(12) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
-	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, serverid int(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid VARCHAR(32) NOT NULL default '', admin VARCHAR(128) NOT NULL default '', adminid VARCHAR(32) NOT NULL default '', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER(12) NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER(12) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
+	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, serverid int(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS WarnSystem_Servers (sid int(12) NOT NULL AUTO_INCREMENT, address VARCHAR(64) NOT NULL default '', PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_GetServerID[] = "SELECT sid FROM WarnSystem_Servers WHERE address = '%s';",
 	g_sSQL_SetServerID[] = "INSERT INTO WarnSystem_Servers (address) VALUES ('%s');",
-	g_sSQL_LoadPlayerData[] = "SELECT * FROM WarnSystem WHERE clientid='%s' AND serverid='%i' AND expired = '0';",
-	g_sSQL_WarnPlayer[] = "INSERT INTO WarnSystem (serverid, client, clientid, admin, adminid, reason, time) VALUES ('%i', '%s', '%s', '%s', '%s', '%s', '%i');",
-	g_sSQL_DeleteWarns[] = "DELETE FROM WarnSystem WHERE clientid = '%s' AND serverid='%i';",
-	g_sSQL_SetExpired[] = "UPDATE WarnSystem SET expired = '1' WHERE clientid = '%s' AND serverid='%i';",
-	g_sSQL_SelectWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%s' AND serverid='%i' AND expired = '0' ORDER BY id DESC LIMIT 1;",
+	g_sSQL_LoadPlayerData[] = "SELECT * FROM WarnSystem WHERE clientid='%i' AND serverid='%i' AND expired = '0';",
+	g_sSQL_WarnPlayer[] = "INSERT INTO WarnSystem (serverid, client, clientid, admin, adminid, reason, time) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
+	g_sSQL_DeleteWarns[] = "DELETE FROM WarnSystem WHERE clientid = '%i' AND serverid='%i';",
+	g_sSQL_SetExpired[] = "UPDATE WarnSystem SET expired = '1' WHERE clientid = '%i' AND serverid='%i';",
+	g_sSQL_SelectWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%i' AND serverid='%i' AND expired = '0' ORDER BY id DESC LIMIT 1;",
 	g_sSQL_UnwarnPlayer[] = "DELETE FROM WarnSystem WHERE id = '%i' AND serverid='%i';",
-	g_sSQL_CheckPlayerWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%s AND serverid='%i'';",
+	g_sSQL_CheckPlayerWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%i AND serverid='%i'';",
 	g_sClientName[MAXPLAYERS+1][MAX_NAME_LENGTH],
-	g_sSteamID[MAXPLAYERS+1][32],
 	g_sClientIP[MAXPLAYERS+1][32];
 	
-int g_iWarnings[MAXPLAYERS+1];
+int g_iWarnings[MAXPLAYERS+1], g_iAccountID[MAXPLAYERS+1];
 
 public void InitializeDatabase()
 {
@@ -33,11 +32,11 @@ public void InitializeDatabase()
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
 	
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
-		g_hDatabase.Query(SQL_CreateTable, g_sSQL_CreateTable_SQLite);
+		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
 	else if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			g_iServerID = -1;
-			g_hDatabase.Query(SQL_CreateTable, g_sSQL_CreateTable_MySQL);
+			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			g_hDatabase.SetCharset("utf8");
 		} else
@@ -53,12 +52,6 @@ public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, con
 		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
 }
 
-public void SQL_CreateTable(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
-{
-	if(!hDatabaseResults || sError[0])
-		SetFailState("[WarnSystem] SQL_CreateTable: %s", sError);
-}
-
 public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
 	if(!hDatabaseResults || sError[0])
@@ -66,9 +59,7 @@ public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResu
 	GetServerID();
 }
 
-#define GetServerIp(%1,%2) GetServerIpFunc(view_as<int>(%1), %1, %2)
-
-public void GetServerIpFunc(int[] array, char[] sBuffer, int iMaxLength)
+public void GetServerIp(int[] array, char[] sBuffer, int iMaxLength)
 {
 	array[0] = GetConVarInt(FindConVar("hostip"));
 	FormatEx(sBuffer, iMaxLength, "%d.%d.%d.%d:%d", sBuffer[3] + 0, sBuffer[2] + 0, sBuffer[1] + 0, sBuffer[0] + 0, GetConVarInt(FindConVar("hostport")));
@@ -77,7 +68,7 @@ public void GetServerIpFunc(int[] array, char[] sBuffer, int iMaxLength)
 public void GetServerID()
 {
 	char sAddress[24], dbQuery[256];
-	GetServerIp(sAddress, sizeof(sAddress));
+	GetServerIp(view_as<int>(sAddress), sAddress, sizeof(sAddress));
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, sAddress);
 	g_hDatabase.Query(SQL_SelectServerID, dbQuery);
 }
@@ -97,7 +88,7 @@ public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults,
 	}
 	
 	char sAddress[24], dbQuery[256];
-	GetServerIp(sAddress, sizeof(sAddress));
+	GetServerIp(view_as<int>(sAddress), sAddress, sizeof(sAddress));
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, sAddress);
 	g_hDatabase.Query(SQL_SetServerID, dbQuery);
 }
@@ -121,10 +112,10 @@ public void LoadPlayerData(int iClient)
 	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[128];
-		GetClientAuthId(iClient, AuthId_Steam2, g_sSteamID[iClient], 32);
+		g_iAccountID[iClient] = GetSteamAccountID(iClient);
 		GetClientName(iClient, g_sClientName[iClient], MAX_NAME_LENGTH);
 		GetClientIP(iClient, g_sClientIP[iClient], 32);
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
 	}
 }
@@ -161,7 +152,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 		WritePackString(hWarnData, sReason);
 		ResetPack(hWarnData);
 		
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_WarnPlayer, dbQuery, hWarnData);
 		
 		CPrintToChatAll("%t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
@@ -195,7 +186,7 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 	SQL_EscapeString(g_hDatabase, sReason, sEscapedReason, sizeof(sEscapedReason));
 	
 	++g_iWarnings[iClient];
-	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, g_iServerID, sEscapedTargetNick, g_sSteamID[iClient], sEscapedClientNick, g_sSteamID[iAdmin], sEscapedReason, iTime);
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, g_iServerID, sEscapedTargetNick, g_iAccountID[iClient], sEscapedClientNick, g_iAccountID[iAdmin], sEscapedReason, iTime);
 	g_hDatabase.Query(SQL_CheckError, dbQuery);
 	
 	if (hDatabaseResults.FetchRow())
@@ -203,13 +194,13 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 		if (g_iWarnings[iClient] >= g_iMaxWarns)
 		{
 			if(g_bResetWarnings)
-				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_sSteamID[iClient], g_iServerID);
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
 			else
-				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_sSteamID[iClient], g_iServerID);
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
 			g_hDatabase.Query(SQL_CheckError, dbQuery);
 			
 			if(g_bLogWarnings)
-				LogWarnings("%t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_sSteamID[iAdmin], g_sClientIP[iAdmin], iClient, g_sSteamID[iClient], g_sClientIP[iClient], sReason);
+				LogWarnings("%t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 			
 			PunishPlayerOnMaxWarns(iClient, sReason);
 		}
@@ -224,7 +215,7 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
-		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		
 		Handle hUnwarnData = CreateDataPack();
 		if (iAdmin)
@@ -269,7 +260,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		CPrintToChatAll("%t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings("%t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_sSteamID[iAdmin], g_sClientIP[iAdmin], iClient, g_sSteamID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("%t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
 		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
@@ -279,7 +270,7 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
-		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		
 		Handle hResetWarnData = CreateDataPack();
 		
@@ -318,13 +309,13 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 	if (hDatabaseResults.FetchRow())
 	{
 		g_iWarnings[iClient] = 0;
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
 		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings("%t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_sSteamID[iAdmin], g_sClientIP[iAdmin], iClient, g_sSteamID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("%t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
 		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
@@ -333,7 +324,7 @@ public void CheckPlayerWarns(int iAdmin, int iClient){
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
 		char dbQuery[255];
-		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_sSteamID[iClient], g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
 		
 		Handle hCheckData = CreateDataPack(); 
 		WritePackCell(hCheckData, GetClientUserId(iAdmin));

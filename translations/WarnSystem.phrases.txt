@@ -85,7 +85,7 @@
 	
 	"WS_LogWarn"
 	{
-		"#format"	"{1:N},{2:s},{3:s},{4:N},{5:s},{6:s},{7:s}"
+		"#format"	"{1:N},{2:i},{3:s},{4:N},{5:i},{6:s},{7:s}"
 		"en"		"ADMIN (NICK: {1} | STEAMID: {2} | IP: {3}) issued a warning on PLAYER (NICK: {4} | STEAMID: {5} | IP: {6}) with reason: {7}"
 		"ru"		"АДМИН (НИК: {1} | STEAMID: {2} | IP: {3}) выдал предупреждение ИГРОКУ (НИК: {4} | STEAMID: {5} | IP: {6}) с причиной: {7}"
 		"fr"		"ADMIN (PSEUDO: {1} | STEAMID: {2} | IP: {3}) a donne un avertissement au JOUEUR (PSEUDO: {4} | STEAMID: {5} | IP: {6}) avec comme motif: {7}"
@@ -107,7 +107,7 @@
 	
 	"WS_LogUnWarn"
 	{
-		"#format" 	"{1:N},{2:s},{3:s},{4:N},{5:s},{6:s},{7:s}"
+		"#format" 	"{1:N},{2:i},{3:s},{4:N},{5:i},{6:s},{7:s}"
 		"en"	  	"ADMIN (NICK: {1} | STEAMID: {2} | IP: {3}) removed a warning on PLAYER (NICK: {4} | STEAMID: {5} | IP: {6}) with reason: {7}"
 		"ru"	  	"АДМИН (НИК: {1} | STEAMID: {2} | IP: {3}) снял предупреждение у ИГРОКА (НИК: {4} | STEAMID: {5} | IP: {6}) с причиной: {7}"
 		"fr"        "ADMIN (PSEUDO: {1} | STEAMID: {2} | IP: {3}) a supprime un avertissement du JOUEUR (PSEUDO: {4} | STEAMID: {5} | IP: {6}) avec comme motif: {7}"
@@ -140,7 +140,7 @@
 	
 	"WS_LogResetWarn"
 	{
-		"#format"	"{1:N},{2:s},{3:s},{4:N},{5:s},{6:s},{7:s}"
+		"#format"	"{1:N},{2:i},{3:s},{4:N},{5:i},{6:s},{7:s}"
 		"en"		"ADMIN (NICK: {1} | STEAMID: {2} | IP: {3}) reseted warnings on PLAYER (NICK: {4} | STEAMID: {5} | IP: {6}) with reason: {7}"
 		"ru"		"АДМИН (НИК: {1} | STEAMID: {2} | IP: {3}) сбросил предупреждение у ИГРОКА (НИК: {4} | STEAMID: {5} | IP: {6}) с причиной: {7}"
 		"fr"        "ADMIN (PSEUDO: {1} | STEAMID: {2} | IP: {3}) a efface les avertissements du JOUEUR (PSEUDO: {4} | STEAMID: {5} | IP: {6}) pour motif: {7}"
