@@ -43,7 +43,7 @@ public void AdminMenu_Warn(Handle topmenu, TopMenuAction action, TopMenuObject o
 		}
 		case TopMenuAction_SelectOption:
 		{
-			DisplayWarnTargetMenu(param);
+			DisplaySomeoneTargetMenu(param, MenuHandler_Warn);
 		}
 	}
 }
@@ -58,7 +58,7 @@ public void AdminMenu_UnWarn(Handle topmenu, TopMenuAction action, TopMenuObject
 		}
 		case TopMenuAction_SelectOption:
 		{
-			DisplayUnWarnTargetMenu(param);
+			DisplaySomeoneTargetMenu(param, MenuHandler_UnWarn);
 		}
 	}
 }
@@ -73,7 +73,7 @@ public void AdminMenu_ResetWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 		}
 		case TopMenuAction_SelectOption:
 		{
-			DisplayResetWarnTargetMenu(param);
+			DisplaySomeoneTargetMenu(param, MenuHandler_ResetWarn);
 		}
 	}
 }
@@ -88,12 +88,12 @@ public void AdminMenu_CheckWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 		}
 		case TopMenuAction_SelectOption:
 		{
-			DisplayCheckWarnTargetMenu(param);
+			DisplaySomeoneTargetMenu(param, MenuHandler_CheckWarn);
 		}
 	}
 }
 
-public void DisplayWarnTargetMenu(int iClient) 
+/*public void DisplayWarnTargetMenu(int iClient) 
 {
 	Menu hMenu = new Menu(MenuHandler_Warn, MENU_ACTIONS_ALL);
 	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
@@ -127,6 +127,14 @@ public void DisplayCheckWarnTargetMenu(int iClient)
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
+}*/
+
+public void DisplaySomeoneTargetMenu(int iClient, MenuHandler ptrFunc) {
+    Menu hMenu = new Menu(ptrFunc, MENU_ACTIONS_ALL);
+    SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
+    SetMenuExitBackButton(hMenu, true);
+    AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
+    DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
 public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2) 
@@ -345,7 +353,7 @@ public void MenuHandler_PreformWarn(Handle menu, MenuAction action, int param1, 
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			WarnPlayer(param1, g_iTarget[param1], sInfo);
+			WarnPlayer(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -369,7 +377,7 @@ public int MenuHandler_PreformUnWarn(Handle menu, MenuAction action, int param1,
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			UnWarnPlayer(param1, g_iTarget[param1], sInfo);
+			UnWarnPlayer(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -393,7 +401,7 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			ResetPlayerWarns(param1, g_iTarget[param1], sInfo);
+			ResetPlayerWarns(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -441,7 +449,8 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 		case MenuAction_Select:
 		{
 			CPrintToChat(param1, "%t %t", "WS_Prefix", "WS_AgreementMessage");
-			SetEntityMoveType(param1, MOVETYPE_WALK);
+			if (IsPlayerAlive(param1))
+				SetEntityMoveType(param1, MOVETYPE_WALK);
 		}
 		case MenuAction_End:
 		{

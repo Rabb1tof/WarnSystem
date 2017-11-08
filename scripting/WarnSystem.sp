@@ -24,7 +24,9 @@
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
 
-bool g_bUseSourcebans, g_bUseMaterialAdmin;
+bool g_bUseSourcebans, g_bUseMaterialAdmin, g_bIsCSGO;
+
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/database.sp"
@@ -40,7 +42,7 @@ public Plugin myinfo =
 	version = "1.0",
 	url = "hlmod.ru"
 };
-	 
+
 public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
@@ -57,6 +59,8 @@ public void OnPluginStart()
 	InitializeDatabase();
 	InitializeCommands();
 	
+	g_bIsCSGO = (GetEngineVersion() == Engine_CSGO);
+	
 	Handle topmenu;
 	if (LibraryExists("adminmenu") && (topmenu = GetAdminTopMenu()))
 		InitializeMenu(topmenu);
@@ -72,28 +76,37 @@ public void OnAllPluginsLoaded()
 		g_bUseMaterialAdmin = true;
 }
 
-public void OnLibraryAdded(const char[] sName)
-{
-	if (!strcmp(sName, "sourcebans", false))
-		g_bUseSourcebans = true;
-	if (!strcmp(sName, "materialadmin", false))
-		g_bUseMaterialAdmin = true;
-}
+public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName, true);}
 
-public void OnLibraryRemoved(const char[] sName)
-{
-	if (strcmp(sName, "sourcebans", false))
-		g_bUseSourcebans = false;
-	if (strcmp(sName, "materialadmin", false))
-		g_bUseMaterialAdmin = false;
-	if (strcmp(sName, "adminmenu", false))
+public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName, false);}
+
+void SetPluginDetection(const char[] sName, bool bBool) {
+	if (StrEqual(sName, "sourcebans"))
+		g_bUseSourcebans = bBool;
+	if (StrEqual(sName, "materialadmin"))
+		g_bUseMaterialAdmin = bBool;
+	if (StrEqual(sName, "adminmenu") && !bBool)
 		g_hAdminMenu = INVALID_HANDLE;
 }
 
 public void OnMapStart()
 {
 	if(g_bWarnSound)
-		PrecacheSound(g_sWarnSoundPath, true);
+	{
+		char sBuffer[PLATFORM_MAX_PATH];
+		FormatEx(sBuffer, sizeof(sBuffer), "sound/%s", g_sWarnSoundPath);
+		if(FileExists(sBuffer, true) || FileExists(sBuffer))
+		{
+			AddFileToDownloadsTable(sBuffer);
+			if(g_bIsCSGO)
+			{
+				FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
+				AddToStringTable(FindStringTable("soundprecache"), sBuffer);
+			}
+			else
+				PrecacheSound(g_sWarnSoundPath, true);
+		}
+	}
 }
 
 public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
@@ -111,13 +124,6 @@ public void PrintToAdmins(char[] sFormat, any ...)
 			CPrintToChat(i, "%s", sBuffer);
 		}
 	}
-}
-
-public void LogWarnings(const char[] sFormat, any ...)
-{
-	char sBuffer[255];
-	VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
-	LogToFileEx(g_sLogPath, "%s", sBuffer);
 }
 
 public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
@@ -154,17 +160,20 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
 			case 2:
 			{
-				SlapPlayer(iClient, g_iSlapDamage, true);
+				if (IsPlayerAlive(iClient))
+					SlapPlayer(iClient, g_iSlapDamage, true);
 				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
 			}
 			case 3:
 			{
-				ForcePlayerSuicide(iClient);
+				if (IsPlayerAlive(iClient))
+					ForcePlayerSuicide(iClient);
 				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
 			}
 			case 4:
 			{
-				SetEntityMoveType(iClient, MOVETYPE_NONE);
+				if (IsPlayerAlive(iClient))
+					SetEntityMoveType(iClient, MOVETYPE_NONE);
 				BuildAgreement(iClient);
 				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
 			}

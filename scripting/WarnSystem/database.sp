@@ -1,7 +1,7 @@
 Database g_hDatabase;
 int g_iServerID = 0;
 
-char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid INTEGER NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid INTEGER NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER NOT NULL default 0, expired INTEGER NOT NULL default 0);",
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid INTEGER(32) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid INTEGER(32) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER(32) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
 	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, serverid int(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS WarnSystem_Servers (sid int(12) NOT NULL AUTO_INCREMENT, address VARCHAR(64) NOT NULL default '', PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
 	g_sSQL_GetServerID[] = "SELECT sid FROM WarnSystem_Servers WHERE address = '%s';",
@@ -12,44 +12,57 @@ char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id IN
 	g_sSQL_SetExpired[] = "UPDATE WarnSystem SET expired = '1' WHERE clientid = '%i' AND serverid='%i';",
 	g_sSQL_SelectWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%i' AND serverid='%i' AND expired = '0' ORDER BY id DESC LIMIT 1;",
 	g_sSQL_UnwarnPlayer[] = "DELETE FROM WarnSystem WHERE id = '%i' AND serverid='%i';",
-	g_sSQL_CheckPlayerWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%i AND serverid='%i'';",
+	g_sSQL_CheckPlayerWarns[] = "SELECT * FROM WarnSystem WHERE clientid='%i' AND serverid='%i';",
 	g_sClientName[MAXPLAYERS+1][MAX_NAME_LENGTH],
-	g_sClientIP[MAXPLAYERS+1][32];
+	g_sClientIP[MAXPLAYERS+1][32],
+	g_sAddress[24];
 	
 int g_iWarnings[MAXPLAYERS+1], g_iAccountID[MAXPLAYERS+1];
 
-public void InitializeDatabase()
-{
-	char sError[256];
-	g_hDatabase = SQL_Connect("warnsystem", false, sError, 256);
-	if(!g_hDatabase)
-	{
-		g_hDatabase = SQLite_UseDatabase("warnsystem", sError, 256);
-		if(!g_hDatabase)
-			SetFailState("[WarnSystem] Could not connect to the database (%s)", sError);
-	}
-
-	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
-	
-	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
-		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
-	else if (hDatabaseDriver == SQL_GetDriver("mysql"))
-		{
-			g_iServerID = -1;
-			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
-			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
-			g_hDatabase.SetCharset("utf8");
-		} else
-			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
-	
-	for(int iClient = 1; iClient <= MaxClients; ++iClient)
-		LoadPlayerData(iClient);
-}
+public void InitializeDatabase() {SQL_TConnect(SQL_TCheckError, "warnsystem");}
 
 public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
 	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
+}
+
+public void SQL_TCheckError(Handle owner, Handle hndl, const char[] sError, any data)
+{
+	char sSQLiteError[128];
+	if(!hndl)
+	{
+		g_hDatabase = SQLite_UseDatabase("warnsystem", sSQLiteError, 256);
+		if(!g_hDatabase)
+			SetFailState("[WarnSystem] Could not connect to the database (%s)", sError);
+	} else g_hDatabase = view_as<Database>(hndl);
+
+	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
+	
+	SQL_LockDatabase(g_hDatabase);
+	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
+	{
+		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
+		SQL_UnlockDatabase(g_hDatabase);
+	} else if (hDatabaseDriver == SQL_GetDriver("mysql"))
+		{
+			g_iServerID = -1;
+			g_hDatabase.SetCharset("utf8");
+			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
+			
+			int array[24];
+			array[0] = GetConVarInt(FindConVar("hostip"));
+			FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d:%d", g_sAddress[3] + 0, g_sAddress[2] + 0, g_sAddress[1] + 0, g_sAddress[0] + 0, GetConVarInt(FindConVar("hostport")));
+			
+			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
+			SQL_UnlockDatabase(g_hDatabase);
+		} else{
+			SQL_UnlockDatabase(g_hDatabase);
+			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
+		}
+	
+	for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);
 }
 
 public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
@@ -59,17 +72,10 @@ public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResu
 	GetServerID();
 }
 
-public void GetServerIp(int[] array, char[] sBuffer, int iMaxLength)
-{
-	array[0] = GetConVarInt(FindConVar("hostip"));
-	FormatEx(sBuffer, iMaxLength, "%d.%d.%d.%d:%d", sBuffer[3] + 0, sBuffer[2] + 0, sBuffer[1] + 0, sBuffer[0] + 0, GetConVarInt(FindConVar("hostport")));
-}
-
 public void GetServerID()
 {
-	char sAddress[24], dbQuery[256];
-	GetServerIp(view_as<int>(sAddress), sAddress, sizeof(sAddress));
-	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, sAddress);
+	char dbQuery[256];
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, g_sAddress);
 	g_hDatabase.Query(SQL_SelectServerID, dbQuery);
 }
 
@@ -87,9 +93,8 @@ public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults,
 		return;
 	}
 	
-	char sAddress[24], dbQuery[256];
-	GetServerIp(view_as<int>(sAddress), sAddress, sizeof(sAddress));
-	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, sAddress);
+	char dbQuery[256];
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, g_sAddress);
 	g_hDatabase.Query(SQL_SetServerID, dbQuery);
 }
 
@@ -139,7 +144,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		
@@ -212,7 +217,7 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -258,16 +263,18 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		CPrintToChatAll("%t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
+		
 		if(g_bLogWarnings)
 			LogWarnings("%t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+		
+		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
 		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -322,7 +329,7 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);

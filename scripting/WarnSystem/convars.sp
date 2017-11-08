@@ -28,6 +28,8 @@ public void OnConfigsExecuted()
 	g_bResetWarnings = g_hCvarResetWarnings.BoolValue;
 	g_iMaxWarns = g_hCvarMaxWarns.IntValue;
 	g_iPunishment = g_hCvarPunishment.IntValue;
+	if (g_iPunishment > 6 || g_iPunishment < 1)
+		LogWarnings("[WarnSystem] ConVar sm_warn_punishment contains incorrect value(%i)", g_iMaxPunishment);
 	g_iMaxPunishment = g_hCvarMaxPunishment.IntValue;
 	g_iBanLenght = g_hCvarBanLength.IntValue;
 	g_iSlapDamage = g_hCvarSlapDamage.IntValue;
@@ -39,7 +41,12 @@ public void OnConfigsExecuted()
 
 public void ChangeCvar_ResetWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bResetWarnings = convar.BoolValue;}
 public void ChangeCvar_MaxWarns(ConVar convar, const char[] oldValue, const char[] newValue){g_iMaxWarns = convar.IntValue;}
-public void ChangeCvar_Punishment(ConVar convar, const char[] oldValue, const char[] newValue){g_iPunishment = convar.IntValue;}
+public void ChangeCvar_Punishment(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	g_iPunishment = convar.IntValue;
+	if (g_iPunishment > 6 || g_iPunishment < 1)
+		LogWarnings("[WarnSystem] ConVar sm_warn_punishment contains incorrect value(%i)", g_iMaxPunishment);
+}
 public void ChangeCvar_MaxPunishment(ConVar convar, const char[] oldValue, const char[] newValue){g_iMaxPunishment = convar.IntValue;}
 public void ChangeCvar_BanLength(ConVar convar, const char[] oldValue, const char[] newValue){g_iBanLenght = convar.IntValue;}
 public void ChangeCvar_SlapDamage(ConVar convar, const char[] oldValue, const char[] newValue){g_iSlapDamage = convar.IntValue;}
