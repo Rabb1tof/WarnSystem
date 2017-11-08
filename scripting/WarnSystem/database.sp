@@ -137,14 +137,14 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	{
 		g_iWarnings[iClient] = SQL_GetRowCount(hDatabaseResults);
 		if (g_bPrintToAdmins)
-			PrintToAdmins("%t %t", "WS_Prefix", "WS_PlayerWarns", iClient, g_iWarnings);
+			PrintToAdmins(" %t %t", "WS_Prefix", "WS_PlayerWarns", iClient, g_iWarnings);
 		WarnSystem_OnClientLoaded(iClient);
 	}
 }
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		
@@ -160,10 +160,14 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_WarnPlayer, dbQuery, hWarnData);
 		
-		CPrintToChatAll("%t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
 		
 		if(g_bWarnSound)
-			EmitSoundToClient(iClient, g_sWarnSoundPath);
+		{
+			char sBuffer[PLATFORM_MAX_PATH];
+			FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
+			EmitSoundToClient(iClient, sBuffer);
+		}
 	}
 }
 
@@ -209,7 +213,7 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 	}
 	
 	if(g_bLogWarnings)
-		LogWarnings("%t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+		LogWarnings(" %t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	
 	WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
 	PunishPlayer(iAdmin, iClient, sReason);
@@ -217,7 +221,7 @@ public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, con
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -262,19 +266,19 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		--g_iWarnings[iClient];
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
-		CPrintToChatAll("%t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		
 		if(g_bLogWarnings)
-			LogWarnings("%t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings(" %t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
-		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -319,17 +323,17 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
-		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings("%t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings(" %t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
-		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (iClient>0 && IsClientInGame(iClient) && !IsFakeClient(iClient) && iAdmin>0 && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
@@ -362,17 +366,17 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	
 	if (hDatabaseResults.FetchRow())
 	{
-		CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
-	CPrintToChat(iAdmin, "%t %t", "WS_Prefix", "See console for output");
+	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
 	
 	char sClient[64], sAdmin[64], sReason[64], sTimeFormat[32];
 	int iDate, iExpired;
 	PrintToConsole(iAdmin, "");
 	PrintToConsole(iAdmin, "");
-	PrintToConsole(iAdmin, "%t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	PrintToConsole(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
 	PrintToConsole(iAdmin, "%-15s %-16s %-22s %-33s %-3i", "Player", "Admin", "Date", "Reason", "Expired");
 	PrintToConsole(iAdmin, "----------------------------------------------------------------------------------------------------");
 	

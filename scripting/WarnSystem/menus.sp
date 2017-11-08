@@ -143,19 +143,19 @@ public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[64];
-			int iUserid, iTarget;
+			char sInfo[16];
+			int iTarget;
 			
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			iUserid = StringToInt(sInfo);
+			iTarget = GetClientOfUserId(StringToInt(sInfo));
 
-			if (!(iTarget = GetClientOfUserId(iUserid)))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
+			if (!iTarget)
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
-				g_iTarget[param1] = iUserid;
+				g_iTarget[param1] = iTarget;
 				DisplayWarnReasons(param1);
 			}
 		}
@@ -179,19 +179,19 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[64];
-			int iUserid, iTarget;
+			char sInfo[16];
+			int iTarget;
 			
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			iUserid = StringToInt(sInfo);
+			iTarget = GetClientOfUserId(StringToInt(sInfo));
 
-			if (!(iTarget = GetClientOfUserId(iUserid)))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
+			if (!iTarget)
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
-				g_iTarget[param1] = iUserid;
+				g_iTarget[param1] = iTarget;
 				DisplayUnWarnReasons(param1);
 			}
 		}
@@ -215,19 +215,19 @@ public int MenuHandler_ResetWarn(Menu menu, MenuAction action, int param1, int p
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[64];
-			int iUserid, iTarget;
+			char sInfo[16];
+			int iTarget;
 			
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			iUserid = StringToInt(sInfo);
+			iTarget = GetClientOfUserId(StringToInt(sInfo));
 
-			if (!(iTarget = GetClientOfUserId(iUserid)))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
+			if (!iTarget)
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
-				g_iTarget[param1] = iUserid;
+				g_iTarget[param1] = iTarget;
 				DisplayResetWarnReasons(param1);
 			}
 		}
@@ -251,16 +251,16 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[64];
+			char sInfo[16];
 			int iTarget;
 			
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			iTarget = GetClientOfUserId(StringToInt(sInfo));
 
 			if (!iTarget)
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Player no longer available");
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, "%t %t", "WS_Prefix", "Unable to target");
+				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 				CheckPlayerWarns(param1, iTarget);
 		}
@@ -353,7 +353,7 @@ public void MenuHandler_PreformWarn(Handle menu, MenuAction action, int param1, 
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			WarnPlayer(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
+			WarnPlayer(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -377,7 +377,7 @@ public int MenuHandler_PreformUnWarn(Handle menu, MenuAction action, int param1,
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			UnWarnPlayer(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
+			UnWarnPlayer(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -401,7 +401,7 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 		{
 			char sInfo[64];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			ResetPlayerWarns(GetClientOfUserId(param1), g_iTarget[param1], sInfo);
+			ResetPlayerWarns(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
 		{
@@ -448,7 +448,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 	{
 		case MenuAction_Select:
 		{
-			CPrintToChat(param1, "%t %t", "WS_Prefix", "WS_AgreementMessage");
+			CPrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
 			if (IsPlayerAlive(param1))
 				SetEntityMoveType(param1, MOVETYPE_WALK);
 		}

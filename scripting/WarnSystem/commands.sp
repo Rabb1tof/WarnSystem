@@ -10,7 +10,7 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 {
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_WarnArguments");
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_WarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -29,7 +29,7 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 {
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_UnWarnArguments");
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_UnWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -48,12 +48,12 @@ public Action Command_WarnReset(int iClient, int iArgs)
 {
 	if(!g_bResetWarnings)
 	{
-		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "No Access");
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "No Access");
 		return Plugin_Handled;
 	}
 	if (iArgs < 2)
 	{
-		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_ResetWarnArguments");
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_ResetWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32], sReason[64], sBuffer[64];
@@ -72,12 +72,12 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 {
 	if (!iClient)
 	{
-		PrintToServer("%t %t", "WS_Prefix", "Command is in-game only");
+		PrintToServer(" %t %t", "WS_Prefix", "Command is in-game only");
 		return Plugin_Handled;
 	}
 	if (!iArgs)
 	{
-		ReplyToCommand(iClient, "%t %t", "WS_Prefix", "WS_CheckWarnArguments");
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_CheckWarnArguments");
 		return Plugin_Handled;
 	}
 	char sArgument[32];

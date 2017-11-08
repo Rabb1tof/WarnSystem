@@ -133,12 +133,12 @@ public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
 		{
 			case 1:
 			{
-				KickClient(iClient, "%t %t", "WS_Prefix", "WS_MaxKick");
+				KickClient(iClient, " %t %t", "WS_Prefix", "WS_MaxKick");
 			}
 			case 2:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), "%t %t", "WS_Prefix", "WS_MaxBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_MaxBan", sReason);
 				if (g_bUseSourcebans)
 					SBBanPlayer(0, iClient, g_iBanLenght, sBanReason);
 				else
@@ -157,36 +157,36 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 		switch (g_iPunishment)
 		{
 			case 1:
-				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 			case 2:
 			{
 				if (IsPlayerAlive(iClient))
 					SlapPlayer(iClient, g_iSlapDamage, true);
-				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 			}
 			case 3:
 			{
 				if (IsPlayerAlive(iClient))
 					ForcePlayerSuicide(iClient);
-				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 			}
 			case 4:
 			{
 				if (IsPlayerAlive(iClient))
 					SetEntityMoveType(iClient, MOVETYPE_NONE);
 				BuildAgreement(iClient);
-				CPrintToChat(iClient, "%t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 			}
 			case 5:
 			{
 				char sKickReason[64];
-				FormatEx(sKickReason, sizeof(sKickReason), "%t %t", "WS_Prefix", "WS_PunishKick", sReason);
+				FormatEx(sKickReason, sizeof(sKickReason), " %t %t", "WS_Prefix", "WS_PunishKick", sReason);
 				KickClient(iClient, sKickReason);
 			}
 			case 6:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), "%t %t", "WS_Prefix", "WS_PunishBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_PunishBan", sReason);
 				if (g_bUseSourcebans)
 					SBBanPlayer(iAdmin, iClient, g_iBanLenght, sBanReason);
 				else if (g_bUseMaterialAdmin)
