@@ -162,13 +162,13 @@
 	
 	//-----------------------------------menus.sp------------------------------------
 	
-	"WS_AdminMenuTitle"
+	"WS_AdminMenuOption"
 	{
 		"en"		"Warnings menu"
 		"ru"		"Меню предупреждений"
 	}
 	
-	"WS_AdminMenuOption"
+	"WS_AdminMenuTitle"
 	{
 		"en"		"Select option"
 		"ru"		"Выберите опцию"

@@ -1,4 +1,5 @@
 Handle g_hGFwd_OnClientLoaded, g_hGFwd_OnClientWarn, g_hGFwd_OnClientUnWarn, g_hGFwd_OnClientResetWarns;
+bool g_bIsLateLoad;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr_Max)
 {
@@ -17,6 +18,8 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	MarkNativeAsOptional("MABanPlayer");
 	
 	RegPluginLibrary("warnsystem");
+	
+	g_bIsLateLoad = bLate;
 	
 	return APLRes_Success;
 }

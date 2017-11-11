@@ -1,4 +1,3 @@
-Database g_hDatabase;
 int g_iServerID = 0;
 
 char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid INTEGER(32) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid INTEGER(32) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER(32) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
@@ -17,17 +16,12 @@ char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id IN
 	g_sClientIP[MAXPLAYERS+1][32],
 	g_sAddress[24];
 	
-int g_iWarnings[MAXPLAYERS+1], g_iAccountID[MAXPLAYERS+1];
+int g_iAccountID[MAXPLAYERS+1];
 
-public void InitializeDatabase() {SQL_TConnect(SQL_TCheckError, "warnsystem");}
+//----------------------------------------------------DATABASE INITILIZING---------------------------------------------------
 
-public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
-{
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
-		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
-}
-
-public void SQL_TCheckError(Handle owner, Handle hndl, const char[] sError, any data)
+public void InitializeDatabase() {SQL_TConnect(SQL_DBConnect, "warnsystem");}
+public void SQL_DBConnect(Handle owner, Handle hndl, const char[] sError, any data)
 {
 	char sSQLiteError[128];
 	if(!hndl)
@@ -56,13 +50,17 @@ public void SQL_TCheckError(Handle owner, Handle hndl, const char[] sError, any 
 			
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			SQL_UnlockDatabase(g_hDatabase);
-		} else{
+		} else {
 			SQL_UnlockDatabase(g_hDatabase);
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
 		}
 	
-	for(int iClient = 1; iClient <= MaxClients; ++iClient)
-		LoadPlayerData(iClient);
+	if (g_bIsLateLoad)
+	{
+		for(int iClient = 1; iClient <= MaxClients; ++iClient)
+			LoadPlayerData(iClient);
+		g_bIsLateLoad = false;
+	}
 }
 
 public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
@@ -110,6 +108,8 @@ public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, co
 		g_iServerID = SQL_GetInsertId(g_hDatabase);
 }
 
+//----------------------------------------------------LOAD PLAYER DATA---------------------------------------------------
+
 public void LoadPlayerData(int iClient)
 {
 	if(!g_hDatabase) return;
@@ -138,90 +138,61 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 		g_iWarnings[iClient] = SQL_GetRowCount(hDatabaseResults);
 		if (g_bPrintToAdmins)
 			PrintToAdmins(" %t %t", "WS_Prefix", "WS_PlayerWarns", iClient, g_iWarnings);
-		WarnSystem_OnClientLoaded(iClient);
-	}
+	} else 
+		g_iWarnings[iClient] = 0;
+	WarnSystem_OnClientLoaded(iClient);
 }
+
+//----------------------------------------------------WARN PLAYER---------------------------------------------------
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 	{
-		char dbQuery[255];
+		char sEscapedClientNick[64], sEscapedTargetNick[64], sEscapedReason[64], dbQuery[255];
+		int iTime = GetTime();
+	
+		SQL_EscapeString(g_hDatabase, g_sClientName[iClient], sEscapedTargetNick, sizeof(sEscapedTargetNick));
+		SQL_EscapeString(g_hDatabase, sReason, sEscapedReason, sizeof(sEscapedReason));
 		
-		Handle hWarnData = CreateDataPack();
-		if (iAdmin)
-			WritePackCell(hWarnData, GetClientUserId(iAdmin));
-		else
-			WritePackCell(hWarnData, 0);
-		WritePackCell(hWarnData, GetClientUserId(iClient));
-		WritePackString(hWarnData, sReason);
-		ResetPack(hWarnData);
-		
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_LoadPlayerData, g_iAccountID[iClient], g_iServerID);
-		g_hDatabase.Query(SQL_WarnPlayer, dbQuery, hWarnData);
-		
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		++g_iWarnings[iClient];
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, g_iServerID, sEscapedTargetNick, g_iAccountID[iClient], sEscapedClientNick, g_iAccountID[iAdmin], sEscapedReason, iTime);
+		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
 		if(g_bWarnSound)
-		{
-			char sBuffer[PLATFORM_MAX_PATH];
-			FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
-			EmitSoundToClient(iClient, sBuffer);
-		}
-	}
-}
-
-public void SQL_WarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hWarnData)
-{
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
-	{
-		LogWarnings("[WarnSystem] SQL_WarnPlayer - error while working with data (%s)", sError);
-		return;
-	}
+			if (g_bIsCSGO)
+			{
+				char sBuffer[PLATFORM_MAX_PATH];
+				FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
+				EmitSoundToClient(iClient, sBuffer);
+			} else
+				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
-	int iAdmin, iClient, iTime;
-	iTime = GetTime();
-	char sReason[64], sEscapedClientNick[64], sEscapedTargetNick[64], sEscapedReason[64], dbQuery[255];
-	
-	if(hWarnData)
-	{
-		iAdmin = GetClientOfUserId(ReadPackCell(hWarnData));
-		iClient = GetClientOfUserId(ReadPackCell(hWarnData));
-		ReadPackString(hWarnData, sReason, sizeof(sReason));
-		CloseHandle(hWarnData);
-	} else return;
-	
-	SQL_EscapeString(g_hDatabase, g_sClientName[iClient], sEscapedTargetNick, sizeof(sEscapedTargetNick));
-	SQL_EscapeString(g_hDatabase, sReason, sEscapedReason, sizeof(sEscapedReason));
-	
-	++g_iWarnings[iClient];
-	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, g_iServerID, sEscapedTargetNick, g_iAccountID[iClient], sEscapedClientNick, g_iAccountID[iAdmin], sEscapedReason, iTime);
-	g_hDatabase.Query(SQL_CheckError, dbQuery);
-	
-	if (hDatabaseResults.FetchRow())
-	{
+		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		if(g_bLogWarnings)
+			LogWarnings(" %t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+		
+		WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
+		
+		//We don't need to fuck db because we cached warns.
 		if (g_iWarnings[iClient] >= g_iMaxWarns)
 		{
 			if(g_bResetWarnings)
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
-			else
+				else
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
 			g_hDatabase.Query(SQL_CheckError, dbQuery);
-			
 			PunishPlayerOnMaxWarns(iClient, sReason);
-		}
+		} else
+			PunishPlayer(iAdmin, iClient, sReason);
 	}
-	
-	if(g_bLogWarnings)
-		LogWarnings(" %t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
-	
-	WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
-	PunishPlayer(iAdmin, iClient, sReason);
 }
+
+//----------------------------------------------------UNWARN PLAYER---------------------------------------------------
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -266,19 +237,21 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		--g_iWarnings[iClient];
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		
+		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings(" %t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
 		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
+//----------------------------------------------------RESET WARNS---------------------------------------------------
+
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -322,18 +295,21 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		g_iWarnings[iClient] = 0;
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
+		//Delete data. Or make it expired?
 		
 		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iClient], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings(" %t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
 		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 }
 
+//----------------------------------------------------CHECK PLAYER WARNS---------------------------------------------------
+
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iClient<=MaxClients && IsClientInGame(iAdmin) && !IsFakeClient(iAdmin))
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
@@ -344,6 +320,7 @@ public void CheckPlayerWarns(int iAdmin, int iClient)
 		ResetPack(hCheckData);
 		
 		g_hDatabase.Query(SQL_CheckPlayerWarns, dbQuery, hCheckData);
+		//mb print only count of warns?
 	}
 }
 
@@ -364,7 +341,7 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 		CloseHandle(hCheckData); 
 	} else return;
 	
-	if (hDatabaseResults.FetchRow())
+	if (!hDatabaseResults.FetchRow())
 	{
 		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 		return;
@@ -376,20 +353,29 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	int iDate, iExpired;
 	PrintToConsole(iAdmin, "");
 	PrintToConsole(iAdmin, "");
+	//we should print it in the chat
 	PrintToConsole(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	//
 	PrintToConsole(iAdmin, "%-15s %-16s %-22s %-33s %-3i", "Player", "Admin", "Date", "Reason", "Expired");
 	PrintToConsole(iAdmin, "----------------------------------------------------------------------------------------------------");
+	//Ya, nice output
 	
 	while (hDatabaseResults.FetchRow())
 	{
-		SQL_FetchString(hDatabaseResults, 1, sClient, sizeof(sClient));
-		SQL_FetchString(hDatabaseResults, 3, sAdmin, sizeof(sAdmin));
-		SQL_FetchString(hDatabaseResults, 5, sReason, sizeof(sReason));
-		iDate = hDatabaseResults.FetchInt(6);
-		iExpired = hDatabaseResults.FetchInt(7);
+		SQL_FetchString(hDatabaseResults, 2, sClient, sizeof(sClient));
+		SQL_FetchString(hDatabaseResults, 4, sAdmin, sizeof(sAdmin));
+		SQL_FetchString(hDatabaseResults, 6, sReason, sizeof(sReason));
+		iDate = hDatabaseResults.FetchInt(8);
+		iExpired = hDatabaseResults.FetchInt(9);
+		//Needs to change if we're changing db structure
 		
 		FormatTime(sTimeFormat, sizeof(sTimeFormat), "%Y-%m-%d %X", iDate);
-		
 		PrintToConsole(iAdmin, "%-15s %-16s %-22s %-33s %-3i", sClient, sAdmin, sTimeFormat, sReason, iExpired);
 	}
+}
+
+public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
+{
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
+		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
 }
