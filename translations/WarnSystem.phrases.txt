@@ -152,12 +152,12 @@
 	"WS_Console"
 	{
 		"#format"	"{1:N},{2:i}"
-		"en"		"Player {1} has been warned {2} time(s) before:"
-		"ru"		"Игрок {1} был предупрежден {2} раз(а):"
-		"fr"        "Le joueur {1} a deja ete averti {2} fois auparavant:"
-		"de" 		"Spieler {1} wurde {2} mal gewarnt:"
-		"sv"        "Spelaren {1} har varnats {2} gånger förut:"
-		"nl"		"Speler {1} is gewaarschuwd {2} keren voordat:"
+		"en"		"Player {1} has been warned {2} time(s) before."
+		"ru"		"Игрок {1} был предупрежден {2} раз(а)."
+		"fr"        "Le joueur {1} a deja ete averti {2} fois auparavant."
+		"de" 		"Spieler {1} wurde {2} mal gewarnt."
+		"sv"        "Spelaren {1} har varnats {2} gånger förut."
+		"nl"		"Speler {1} is gewaarschuwd {2} keren voordat."
 	}
 	
 	//-----------------------------------menus.sp------------------------------------

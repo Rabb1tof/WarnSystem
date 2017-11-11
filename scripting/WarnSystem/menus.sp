@@ -312,20 +312,19 @@ public void BuildAgreement(int iClient)
 	
 	char sBuffer[128];
 	
-	Menu hMenu = new Menu(MenuHandler_WarnAgreement, MenuAction_Select|MenuAction_End);
-	SetMenuTitle(hMenu, "%T", "WS_AgreementTitle", iClient);
-	SetMenuExitBackButton(hMenu, false);
-	
-	AddMenuItem(hMenu, NULL_STRING, NULL_STRING, ITEMDRAW_RAWLINE|ITEMDRAW_SPACER);
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer)))
-		AddMenuItem(hMenu, NULL_STRING, sBuffer, ITEMDRAW_RAWLINE);
-	AddMenuItem(hMenu, NULL_STRING, NULL_STRING, ITEMDRAW_RAWLINE|ITEMDRAW_SPACER);
-	
+	Handle hMenu = CreatePanel();
+	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementTitle", iClient);
+	SetPanelTitle(hMenu, sBuffer);
+	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
+	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer)))
+		DrawPanelText(hMenu, sBuffer);
+	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
 	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementAgree", iClient);
-	AddMenuItem(hMenu, NULL_STRING, sBuffer);
-	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
-
-	CloseHandle(hFilePath);
+	DrawPanelItem(hMenu, sBuffer);
+	SendPanelToClient(hMenu, iClient, MenuHandler_WarnAgreement, MENU_TIME_FOREVER);
+	
+	CloseHandle(hMenu);
+ 	CloseHandle(hFilePath);
 }
 
 public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1, int param2)

@@ -98,7 +98,15 @@ void SetPluginDetection(const char[] sName, bool bBool) {
 		g_hAdminMenu = INVALID_HANDLE;
 }
 
-public void OnMapStart()
+public void OnMapStart() {PrecacheWarnSound();}
+
+public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
+
+public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
+
+//----------------------------------------------------SOME FEATURES---------------------------------------------------
+
+public void PrecacheWarnSound()
 {
 	if(g_bWarnSound)
 	{
@@ -117,12 +125,6 @@ public void OnMapStart()
 		}
 	}
 }
-
-public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
-
-public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
-
-//----------------------------------------------------SOME FEATURES---------------------------------------------------
 
 public void PrintToAdmins(char[] sFormat, any ...)
 {
