@@ -21,7 +21,8 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
 	}
 	int iTarget = FindTarget(iClient, sArgument, true, true);
-	WarnPlayer(iClient, iTarget, sReason);
+	if (iTarget)
+		WarnPlayer(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -40,7 +41,8 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
 	}
 	int iTarget = FindTarget(iClient, sArgument, true, true);
-	UnWarnPlayer(iClient, iTarget, sReason);
+	if (iTarget)
+		UnWarnPlayer(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -64,7 +66,8 @@ public Action Command_WarnReset(int iClient, int iArgs)
 		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
 	}
 	int iTarget = FindTarget(iClient, sArgument, true, true);
-	ResetPlayerWarns(iClient, iTarget, sReason);
+	if (iTarget)
+		ResetPlayerWarns(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -83,6 +86,7 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 	char sArgument[32];
 	GetCmdArg(1, sArgument, sizeof(sArgument));
 	int iTarget = FindTarget(iClient, sArgument, true, true);
-	CheckPlayerWarns(iClient, iTarget);
+	if (iTarget)
+		CheckPlayerWarns(iClient, iTarget);
 	return Plugin_Handled;
 }

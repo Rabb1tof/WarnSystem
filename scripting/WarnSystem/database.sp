@@ -1,16 +1,16 @@
 int g_iServerID = 0;
 
-char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, serverid INTEGER(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid INTEGER(32) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid INTEGER(32) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time INTEGER(32) NOT NULL default 0, expired INTEGER(1) NOT NULL default 0);",
-	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS WarnSystem (id int(12) NOT NULL AUTO_INCREMENT, serverid int(12) NOT NULL default 0, client VARCHAR(128) NOT NULL default '', clientid int(64) NOT NULL default '0', admin VARCHAR(128) NOT NULL default '', adminid int(64) NOT NULL default '0', reason VARCHAR(64) NOT NULL default '', time int(12) NOT NULL default 0, expired int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
-	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS WarnSystem_Servers (sid int(12) NOT NULL AUTO_INCREMENT, address VARCHAR(64) NOT NULL default '', PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
-	g_sSQL_GetServerID[] = "SELECT sid FROM WarnSystem_Servers WHERE address = '%s';",
-	g_sSQL_SetServerID[] = "INSERT INTO WarnSystem_Servers (address) VALUES ('%s');",
-	g_sSQL_WarnPlayer[] = "INSERT INTO WarnSystem (serverid, client, clientid, admin, adminid, reason, time) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
-	g_sSQL_DeleteWarns[] = "DELETE FROM WarnSystem WHERE clientid = '%i' AND serverid='%i';",
-	g_sSQL_SetExpired[] = "UPDATE WarnSystem SET expired = '1' WHERE clientid = '%i' AND serverid='%i';",
-	g_sSQL_SelectWarns[] = "SELECT id FROM WarnSystem WHERE clientid='%i' AND serverid='%i' AND expired = '0' ORDER BY id DESC LIMIT 1;",
-	g_sSQL_UnwarnPlayer[] = "DELETE FROM WarnSystem WHERE id = '%i' AND serverid='%i';",
-	g_sSQL_CheckPlayerWarns[] = "SELECT client,admin,reason,time,expired FROM WarnSystem WHERE clientid='%i' AND serverid='%i';",
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `serverid` INTEGER(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` INTEGER(32) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` INTEGER(32) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` INTEGER(32) NOT NULL default 0, `expired` INTEGER(1) NOT NULL default 0);",
+	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` int(12) NOT NULL AUTO_INCREMENT, `serverid` int(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` int(64) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` int(64) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` int(12) NOT NULL default 0, `expired` int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
+	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS `WarnSystem_Servers` (`sid` int(12) NOT NULL AUTO_INCREMENT, `address` VARCHAR(64) NOT NULL default '', PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
+	g_sSQL_GetServerID[] = "SELECT `sid` FROM `WarnSystem_Servers` WHERE `address` = '%s';",
+	g_sSQL_SetServerID[] = "INSERT INTO `WarnSystem_Servers` (`address`) VALUES ('%s');",
+	g_sSQL_WarnPlayer[] = "INSERT INTO `WarnSystem` (`serverid`, `client`, `clientid`, `admin`, `adminid`, `reason`, `time`) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
+	g_sSQL_DeleteWarns[] = "DELETE FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
+	g_sSQL_SetExpired[] = "UPDATE `WarnSystem` SET `expired` = '1' WHERE `clientid` = '%i' AND `serverid` = '%i';",
+	g_sSQL_SelectWarns[] = "SELECT `id` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i' AND `expired` = '0' ORDER BY `id` DESC LIMIT 1;",
+	g_sSQL_UnwarnPlayer[] = "DELETE FROM `WarnSystem` WHERE `id` = '%i' AND `serverid` = '%i';",
+	g_sSQL_CheckPlayerWarns[] = "SELECT `client`,`admin`,`reason`,`time`,`expired` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
 	g_sClientIP[MAXPLAYERS+1][32],
 	g_sAddress[24];
 	
@@ -322,7 +322,6 @@ public void CheckPlayerWarns(int iAdmin, int iClient)
 		WritePackCell(hCheckData, GetClientUserId(iClient));
 		ResetPack(hCheckData);
 		
-		LogWarnings("CheckPlayerWarns Query: %s", dbQuery);
 		g_hDatabase.Query(SQL_CheckPlayerWarns, dbQuery, hCheckData);
 		//mb print only count of warns?
 	}
@@ -338,18 +337,18 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	
 	int iAdmin, iClient;
 	
-	if (!hDatabaseResults.RowCount)
-	{
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
-		return;
-	}
-	
 	if(hCheckData)
 	{
 		iAdmin = GetClientOfUserId(ReadPackCell(hCheckData));
 		iClient = GetClientOfUserId(ReadPackCell(hCheckData));
 		CloseHandle(hCheckData); 
 	} else return;
+	
+	if (!hDatabaseResults.RowCount)
+	{
+		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		return;
+	}
 	
 	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
 	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
@@ -358,7 +357,7 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	int iDate, iExpired;
 	PrintToConsole(iAdmin, "");
 	PrintToConsole(iAdmin, "");
-	PrintToConsole(iAdmin, "%-18s %-18s %-26s %-26s %-3s", "Player", "Admin", "Date", "Reason", "Expired");
+	PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1s", "Player", "Admin", "Date", "Reason", "Expired");
 	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
 	//Ya, nice output
 	
@@ -371,8 +370,11 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 		iExpired = hDatabaseResults.FetchInt(4);
 		
 		FormatTime(sTimeFormat, sizeof(sTimeFormat), "%Y-%m-%d %X", iDate);
-		PrintToConsole(iAdmin, "%-18s %-18s %-26s %-26s %-3i", sClient, sAdmin, sTimeFormat, sReason, iExpired);
+		PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1i", sClient, sAdmin, sTimeFormat, sReason, iExpired);
 	}
+	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
+	PrintToConsole(iAdmin, "");
+	PrintToConsole(iAdmin, "");
 }
 
 public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
