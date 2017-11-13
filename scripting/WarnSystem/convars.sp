@@ -1,8 +1,10 @@
 ConVar g_hCvarMaxWarns, g_hCvarMaxPunishment, g_hCvarBanLength, g_hCvarPunishment, g_hCvarSlapDamage, g_hCvarPrintToAdmins,
-		g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings;
+		g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings, g_hWarnAdminFlag, g_hUnWarnAdminFlag,
+		 g_hResetWarnAdminFlag, g_hCheckWarnAdminFlag;
 
 bool g_bResetWarnings, g_bWarnSound, g_bPrintToAdmins, g_bLogWarnings;
-int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iSlapDamage;
+int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iSlapDamage, g_iWarnAdminFlag, 
+		g_iUnWarnAdminFlag, g_iResetWarnAdminFlag, g_iCheckWarnAdminFlag;
 char g_sWarnSoundPath[PLATFORM_MAX_PATH];
 
 public void InitializeConVars()
@@ -16,6 +18,11 @@ public void InitializeConVars()
 	
 	(g_hCvarWarnSound = CreateConVar("sm_warns_warnsound", "1", "Play a sound when a user receives a warning: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_WarnSound);
 	(g_hCvarWarnSoundPath = CreateConVar("sm_warns_warnsoundpath", "buttons/weapon_cant_buy.wav", "Path to the sound that'll play when a user receives a warning")).AddChangeHook(ChangeCvar_WarnSoundPath);
+	
+	(g_hWarnAdminFlag = CreateConVar("sm_warns_warnflag", "d", "Warn admin flag(a for example)")).AddChangeHook(ChangeCvar_WarnFlag);
+	(g_hUnWarnAdminFlag = CreateConVar("sm_warns_unwarnflag", "e", "Unwarn admin flag(a for example)")).AddChangeHook(ChangeCvar_UnWarnFlag);
+	(g_hCheckWarnAdminFlag = CreateConVar("sm_warns_checkwarnflag", "d", "Checkwarn admin flag(a for example)")).AddChangeHook(ChangeCvar_CheckWarnFlag);
+	(g_hResetWarnAdminFlag = CreateConVar("sm_warns_resetwarnflag", "e", "Resetwarn admin flag(a for example)")).AddChangeHook(ChangeCvar_ResetWarnFlag);
 	
 	(g_hCvarPrintToAdmins = CreateConVar("sm_warns_printtoadmins", "1", "Print previous warnings on client connect to admins: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToAdmins);
 	(g_hCvarLogWarnings = CreateConVar("sm_warns_enablelogs", "1", "Log errors and warns: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_LogWarnings);
@@ -33,8 +40,33 @@ public void OnConfigsExecuted()
 	g_iSlapDamage = g_hCvarSlapDamage.IntValue;
 	g_bWarnSound = g_hCvarWarnSound.BoolValue;
 	g_hCvarWarnSoundPath.GetString(g_sWarnSoundPath, sizeof(g_sWarnSoundPath));
+	
+	char sBuffer[16];
+	g_hWarnAdminFlag.GetString(sBuffer, sizeof(sBuffer));
+	g_iWarnAdminFlag = ReadFlagString(sBuffer);
+	g_hUnWarnAdminFlag.GetString(sBuffer, sizeof(sBuffer));
+	g_iUnWarnAdminFlag = ReadFlagString(sBuffer);
+	g_hResetWarnAdminFlag.GetString(sBuffer, sizeof(sBuffer));
+	g_iResetWarnAdminFlag = ReadFlagString(sBuffer);
+	g_hCheckWarnAdminFlag.GetString(sBuffer, sizeof(sBuffer));
+	g_iCheckWarnAdminFlag = ReadFlagString(sBuffer);
+	
 	g_bPrintToAdmins = g_hCvarPrintToAdmins.BoolValue;
 	g_bLogWarnings = g_hCvarLogWarnings.BoolValue;
+	
+	static bool bIsFirstExec = true;
+	if(bIsFirstExec)
+	{
+		InitializeDatabase();
+		InitializeCommands();
+		if (LibraryExists("adminmenu"))
+		{
+			Handle hAdminMenu;
+			if ((hAdminMenu = GetAdminTopMenu()))
+				InitializeMenu(hAdminMenu);
+		}
+		bIsFirstExec = false;
+	}
 }
 
 public void ChangeCvar_ResetWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bResetWarnings = convar.BoolValue;}
@@ -45,5 +77,31 @@ public void ChangeCvar_BanLength(ConVar convar, const char[] oldValue, const cha
 public void ChangeCvar_SlapDamage(ConVar convar, const char[] oldValue, const char[] newValue){g_iSlapDamage = convar.IntValue;}
 public void ChangeCvar_WarnSound(ConVar convar, const char[] oldValue, const char[] newValue){g_bWarnSound = convar.BoolValue;}
 public void ChangeCvar_WarnSoundPath(ConVar convar, const char[] oldValue, const char[] newValue){convar.GetString(g_sWarnSoundPath, sizeof(g_sWarnSoundPath));}
+
+public void ChangeCvar_WarnFlag(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char sBuffer[16];
+	convar.GetString(sBuffer, sizeof(sBuffer));
+	g_iWarnAdminFlag = ReadFlagString(sBuffer);
+}
+public void ChangeCvar_UnWarnFlag(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char sBuffer[16];
+	convar.GetString(sBuffer, sizeof(sBuffer));
+	g_iUnWarnAdminFlag = ReadFlagString(sBuffer);
+}
+public void ChangeCvar_ResetWarnFlag(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char sBuffer[16];
+	convar.GetString(sBuffer, sizeof(sBuffer));
+	g_iResetWarnAdminFlag = ReadFlagString(sBuffer);
+}
+public void ChangeCvar_CheckWarnFlag(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char sBuffer[16];
+	convar.GetString(sBuffer, sizeof(sBuffer));
+	g_iCheckWarnAdminFlag = ReadFlagString(sBuffer);
+}
+
 public void ChangeCvar_PrintToAdmins(ConVar convar, const char[] oldValue, const char[] newValue){g_bPrintToAdmins = convar.BoolValue;}
 public void ChangeCvar_LogWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bLogWarnings = convar.BoolValue;}

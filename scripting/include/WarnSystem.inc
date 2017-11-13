@@ -50,6 +50,14 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  native int WarnSystem_GetPlayerWarns(int iClient);
  
  /*********************************************************
+ * Prints message to admins.
+ *
+ * @param 	sMessage
+ * @noreturn
+ *********************************************************/
+ native void WarnSystem_PrintToAdmins(char sMessage[256]);
+ 
+ /*********************************************************
  * Calling then client data loaded successfully
  *
  * @param iClient		Client
