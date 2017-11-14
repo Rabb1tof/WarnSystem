@@ -9,24 +9,15 @@
 #define REQUIRE_PLUGIN
 //sb and ma not required for compile, but bans with this plugins w'll be unavailable
 
-#pragma newdecls required
-
 #include <sourcemod>
 #include <sdktools>
 #include <adminmenu>
-
-#define ADMINMENUFLAG 		ADMFLAG_BAN
-#define WARNFLAG 			ADMFLAG_BAN
-#define UNWARNFLAG 			ADMFLAG_UNBAN
-#define RESETWARNSFLAG		ADMFLAG_UNBAN
-#define CHECKWARNFLAG 		ADMFLAG_BAN
-#define PRINTTOADMINSFLAG	ADMFLAG_BAN
-//Admin flags for features.
+#pragma newdecls required
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
 
-bool g_bUseSourcebans, g_bUseMaterialAdmin, g_bIsCSGO;
+bool g_bUseSourcebans, g_bUseMaterialAdmin, g_bIsFuckingGame;
 
 Database g_hDatabase;
 
@@ -45,8 +36,8 @@ public Plugin myinfo =
 	name = "WarnSystem",
 	author = "vadrozh, ecca",
 	description = "Warn players when they are doing something wrong",
-	version = "1.0",
-	url = "hlmod.ru"
+	version = "1.1",
+	url = "hlmod.ru/threads/warnsystem.42835/"
 };
 
 //----------------------------------------------------INITIALIZING---------------------------------------------------
@@ -57,7 +48,7 @@ public void OnPluginStart()
 	LoadTranslations("core.phrases");
 	LoadTranslations("WarnSystem.phrases");
 	
-	g_bIsCSGO = (GetEngineVersion() == Engine_CSGO);
+	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
 	
 	BuildPath(Path_SM, g_sPathWarnReasons, sizeof(g_sPathWarnReasons), "configs/WarnSystem/WarnReasons.cfg");
 	BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnWarnReasons.cfg");
@@ -66,12 +57,6 @@ public void OnPluginStart()
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem.log");
 	
 	InitializeConVars();
-	InitializeDatabase();
-	InitializeCommands();
-	
-	Handle hAdminMenu;
-	if (LibraryExists("adminmenu") && (hAdminMenu = GetAdminTopMenu()))
-		InitializeMenu(hAdminMenu);
 	
 	strcopy(g_sClientIP[0], 32, "localhost");
 	g_iAccountID[0] = -1;
@@ -98,15 +83,7 @@ void SetPluginDetection(const char[] sName, bool bBool) {
 		g_hAdminMenu = INVALID_HANDLE;
 }
 
-public void OnMapStart() {PrecacheWarnSound();}
-
-public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
-
-public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
-
-//----------------------------------------------------SOME FEATURES---------------------------------------------------
-
-public void PrecacheWarnSound()
+public void OnMapStart()
 {
 	if(g_bWarnSound)
 	{
@@ -115,7 +92,7 @@ public void PrecacheWarnSound()
 		if(FileExists(sBuffer, true) || FileExists(sBuffer))
 		{
 			AddFileToDownloadsTable(sBuffer);
-			if(g_bIsCSGO)
+			if(g_bIsFuckingGame)
 			{
 				FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
 				AddToStringTable(FindStringTable("soundprecache"), sBuffer);
@@ -126,17 +103,21 @@ public void PrecacheWarnSound()
 	}
 }
 
-public void PrintToAdmins(char[] sFormat, any ...)
+public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
+
+public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
+
+//---------------------------------------------------SOME FEATURES-------------------------------------------------
+
+stock void PrintToAdmins(char[] sFormat, any ...)
 {
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
-	{
-		if (IsClientInGame(i) && (GetUserFlagBits(i) & PRINTTOADMINSFLAG))
+		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iCheckWarnAdminFlag))
 		{
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
-		}
-	}
+        }
 }
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------

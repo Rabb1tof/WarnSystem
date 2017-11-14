@@ -36,7 +36,8 @@ public void SQL_DBConnect(Handle owner, Handle hndl, const char[] sError, any da
 	{
 		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
 		SQL_UnlockDatabase(g_hDatabase);
-	} else if (hDatabaseDriver == SQL_GetDriver("mysql"))
+	} else
+		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			g_iServerID = -1;
 			g_hDatabase.SetCharset("utf8");
@@ -57,7 +58,6 @@ public void SQL_DBConnect(Handle owner, Handle hndl, const char[] sError, any da
 	{
 		for(int iClient = 1; iClient <= MaxClients; ++iClient)
 			LoadPlayerData(iClient);
-		PrecacheWarnSound();
 		g_bIsLateLoad = false;
 	}
 }
@@ -71,7 +71,7 @@ public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResu
 
 public void GetServerID()
 {
-	char dbQuery[256];
+	char dbQuery[255];
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, g_sAddress);
 	g_hDatabase.Query(SQL_SelectServerID, dbQuery);
 }
@@ -90,7 +90,7 @@ public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults,
 		return;
 	}
 	
-	char dbQuery[256];
+	char dbQuery[255];
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, g_sAddress);
 	g_hDatabase.Query(SQL_SetServerID, dbQuery);
 }
@@ -115,7 +115,7 @@ public void LoadPlayerData(int iClient)
 	
 	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 	{
-		char dbQuery[128];
+		char dbQuery[255];
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
 		GetClientIP(iClient, g_sClientIP[iClient], 32);
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -163,7 +163,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
 		if(g_bWarnSound)
-			if (g_bIsCSGO)
+			if (g_bIsFuckingGame)
 			{
 				char sBuffer[PLATFORM_MAX_PATH];
 				FormatEx(sBuffer, sizeof(sBuffer), "*/%s", g_sWarnSoundPath);
@@ -354,9 +354,8 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
 	
 	char sClient[64], sAdmin[64], sReason[64], sTimeFormat[32];
-	int iDate, iExpired;
-	PrintToConsole(iAdmin, "");
-	PrintToConsole(iAdmin, "");
+	int iDate, iExpired, i;
+	for (i = 0; i < 2; ++i) PrintToConsole(iAdmin, " ");
 	PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1s", "Player", "Admin", "Date", "Reason", "Expired");
 	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
 	//Ya, nice output
@@ -373,8 +372,7 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 		PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1i", sClient, sAdmin, sTimeFormat, sReason, iExpired);
 	}
 	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
-	PrintToConsole(iAdmin, "");
-	PrintToConsole(iAdmin, "");
+	for (i = 0; i < 2; ++i) PrintToConsole(iAdmin, " ");
 }
 
 public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)

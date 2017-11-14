@@ -8,6 +8,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("WarnSystem_ResetWarn", Native_ResetWarnPlayer);
 	CreateNative("WarnSystem_GetDatabase", Native_GetDatabase);
 	CreateNative("WarnSystem_GetPlayerWarns", Native_GetPlayerWarns);
+	CreateNative("WarnSystem_PrintToAdmins", Native_PrintToAdmins);
 	
 	g_hGFwd_OnClientLoaded = CreateGlobalForward("WarnSystem_OnClientLoaded", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_String);
@@ -24,6 +25,13 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	return APLRes_Success;
 }
 
+public int Native_PrintToAdmins(Handle hPlugin, int iNumParams)
+{
+	char sMessage[256];
+	GetNativeString(1, sMessage, sizeof(sMessage));
+	PrintToAdmins(sMessage);
+}
+
 public int Native_GetDatabase(Handle hPlugin, int iNumParams) {return view_as<int>(CloneHandle(g_hDatabase, hPlugin));}
 
 public int Native_GetPlayerWarns(Handle hPlugin, int iNumParams)
@@ -38,7 +46,10 @@ public int Native_WarnPlayer(Handle hPlugin, int iNumParams)
 	int iClient = GetNativeCell(2);
 	char sReason[64];
 	GetNativeString(3, sReason, sizeof(sReason));
-	WarnPlayer(iAdmin, iClient, sReason);
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+		WarnPlayer(iAdmin, iClient, sReason);
+	else
+		ThrowNativeError(1, "Native_WarnPlayer: Client or admin index is invalid.");
 }
 
 public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
@@ -47,7 +58,10 @@ public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
 	int iClient = GetNativeCell(2);
 	char sReason[64];
 	GetNativeString(3, sReason, sizeof(sReason));
-	UnWarnPlayer(iAdmin, iClient, sReason);
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+		UnWarnPlayer(iAdmin, iClient, sReason);
+	else
+		ThrowNativeError(2, "Native_UnWarnPlayer: Client or admin index is invalid.");
 }
 
 public int Native_ResetWarnPlayer(Handle hPlugin, int iNumParams)
@@ -56,7 +70,10 @@ public int Native_ResetWarnPlayer(Handle hPlugin, int iNumParams)
 	int iClient = GetNativeCell(2);
 	char sReason[64];
 	GetNativeString(3, sReason, sizeof(sReason));
-	ResetPlayerWarns(iAdmin, iClient, sReason);
+	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+		ResetPlayerWarns(iAdmin, iClient, sReason);
+	else
+		ThrowNativeError(3, "Native_ResetWarnPlayer: Client or admin index is invalid.");
 }
 
 void WarnSystem_OnClientLoaded(int iClient)
