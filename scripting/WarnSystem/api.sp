@@ -1,4 +1,5 @@
-Handle g_hGFwd_OnClientLoaded, g_hGFwd_OnClientWarn, g_hGFwd_OnClientUnWarn, g_hGFwd_OnClientResetWarns;
+Handle g_hGFwd_OnClientLoaded, g_hGFwd_OnClientWarn, g_hGFwd_OnClientUnWarn, g_hGFwd_OnClientResetWarns,
+		g_hGFwd_WarnPunishment, g_hGFwd_WarnMaxPunishment;
 bool g_bIsLateLoad;
 
 public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr_Max)
@@ -14,6 +15,8 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientUnWarn = CreateGlobalForward("WarnSystem_OnClientUnWarn", ET_Ignore, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns = CreateGlobalForward("WarnSystem_OnClientResetWarns", ET_Ignore, Param_Cell, Param_Cell, Param_String);
+	g_hGFwd_WarnPunishment = CreateGlobalForward("WarnSystem_WarnPunishment", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
+	g_hGFwd_WarnMaxPunishment = CreateGlobalForward("WarnSystem_WarnMaxPunishment", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	
 	MarkNativeAsOptional("SBBanPlayer");
 	MarkNativeAsOptional("MABanPlayer");
@@ -110,4 +113,28 @@ void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[64])
 	Call_PushCell(iClient);
 	Call_PushString(sReason);
 	Call_Finish();
+}
+
+void WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght,  char sReason[64])
+{
+	Action act = Plugin_Continue;
+	Call_StartForward(g_hGFwd_WarnPunishment);
+	Call_PushCell(iAdmin);
+	Call_PushCell(iClient);
+	Call_PushCell(iBanLenght);
+	Call_PushString(sReason);
+	Call_Finish(act);
+	return act;
+}
+
+void WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+{
+	Action act = Plugin_Continue;
+	Call_StartForward(g_hGFwd_WarnMaxPunishment);
+	Call_PushCell(iAdmin);
+	Call_PushCell(iClient);
+	Call_PushCell(iBanLenght);
+	Call_PushString(sReason);
+	Call_Finish(act);
+	return act;
 }

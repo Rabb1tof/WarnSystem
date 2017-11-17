@@ -96,3 +96,23 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @noreturn	
  *********************************************************/
  forward void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[64]);
+ 
+ /*********************************************************
+ * Calling on warn to punish player
+ *
+ * @param iAdmin		The admin who issued warn
+ * @param iClient		The client
+ * @param sReason		The ban reason
+ * @return Plugin_Handled or Plugin_Stop
+ *********************************************************/
+ forward void WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64]);
+ 
+ /*********************************************************
+ * Calling on maxwarns to punish player
+ *
+ * @param iAdmin		The admin who issued warn
+ * @param iClient		The client
+ * @param sReason		The ban reason
+ * @return Plugin_Handled or Plugin_Stop
+ *********************************************************/
+ forward void WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64]);
