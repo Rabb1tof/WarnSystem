@@ -1,9 +1,9 @@
 public void InitializeCommands()
 {
-	RegAdminCmd("sm_warn", Command_WarnPlayer, g_iWarnAdminFlag);
-	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, g_iUnWarnAdminFlag);
-	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, g_iCheckWarnAdminFlag);
-	RegAdminCmd("sm_resetwarn", Command_WarnReset, g_iResetWarnAdminFlag);
+	RegAdminCmd("sm_warn", Command_WarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_resetwarn", Command_WarnReset, ADMFLAG_GENERIC);
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)

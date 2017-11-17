@@ -1,15 +1,5 @@
 #pragma semicolon 1
 #include <colors>
-
-#undef REQUIRE_PLUGIN
-#undef REQUIRE_EXTENSIONS
-#tryinclude <sourcebans>
-#tryinclude <materialadmin>
-#define REQUIRE_EXTENSIONS
-#define REQUIRE_PLUGIN
-//sb and ma not required for compile, but bans with this plugins w'll be unavailable
-
-#include <sourcemod>
 #include <sdktools>
 #include <adminmenu>
 #pragma newdecls required
@@ -17,11 +7,11 @@
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
 
-bool g_bUseSourcebans, g_bUseMaterialAdmin, g_bIsFuckingGame;
+bool g_bIsFuckingGame;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1];
+int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
 
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 
@@ -36,7 +26,7 @@ public Plugin myinfo =
 	name = "WarnSystem",
 	author = "vadrozh, ecca",
 	description = "Warn players when they are doing something wrong",
-	version = "1.1",
+	version = "1.2",
 	url = "hlmod.ru/threads/warnsystem.42835/"
 };
 
@@ -57,17 +47,20 @@ public void OnPluginStart()
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem.log");
 	
 	InitializeConVars();
-	
+	InitializeDatabase();
+	InitializeCommands();
+	if (LibraryExists("adminmenu"))
+	{
+		Handle hAdminMenu;
+		if ((hAdminMenu = GetAdminTopMenu()))
+			InitializeMenu(hAdminMenu);
+	}
+		
 	strcopy(g_sClientIP[0], 32, "localhost");
 	g_iAccountID[0] = -1;
-}
-
-public void OnAllPluginsLoaded()
-{
-	if (LibraryExists("sourcebans"))
-		g_bUseSourcebans = true;
-	if (LibraryExists("materialadmin"))
-		g_bUseMaterialAdmin = true;
+	
+	if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
+		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
 
 public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName, true);}
@@ -75,10 +68,6 @@ public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName, true);
 public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName, false);}
 
 void SetPluginDetection(const char[] sName, bool bBool) {
-	if (StrEqual(sName, "sourcebans"))
-		g_bUseSourcebans = bBool;
-	if (StrEqual(sName, "materialadmin"))
-		g_bUseMaterialAdmin = bBool;
 	if (StrEqual(sName, "adminmenu") && !bBool)
 		g_hAdminMenu = INVALID_HANDLE;
 }
@@ -113,7 +102,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 {
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
-		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iCheckWarnAdminFlag))
+		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
 		{
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
@@ -122,7 +111,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
 
-public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
+public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iMaxPunishment)
@@ -133,13 +122,18 @@ public void PunishPlayerOnMaxWarns(int iClient, char sReason[64])
 			{
 				char sBanReason[64];
 				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_MaxBan", sReason);
-				if (g_bUseSourcebans)
-					SBBanPlayer(0, iClient, g_iBanLenght, sBanReason);
-				else
-					BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
+				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
-			//case 3:
-			//I'll be add support of modules with punishments
+			case 3:
+			{
+				char sBanReason[64];
+				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_MaxBan", sReason);
+				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
+				{
+					LogWarnings("Selected max punishment with custom module but module doesn't exists.  Client kicked.");
+					KickClient(iClient, " %t %t", "WS_Prefix", "WS_MaxKick");
+				}
+			}
 	}
 }
 
@@ -179,14 +173,20 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 			{
 				char sBanReason[64];
 				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_PunishBan", sReason);
-				if (g_bUseSourcebans)
-					SBBanPlayer(iAdmin, iClient, g_iBanLenght, sBanReason);
-				else if (g_bUseMaterialAdmin)
-					MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, g_iBanLenght, sBanReason);
-				else
-					BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
+				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
-			//case 7:
-			//I'll be add support of modules with punishments
+			case 7:
+			{
+				char sBanReason[64];
+				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_PunishBan", sReason);
+				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
+				{
+					LogWarnings("Selected punishment with custom module but module doesn't exists.");
+					if (IsPlayerAlive(iClient))
+						SetEntityMoveType(iClient, MOVETYPE_NONE);
+					BuildAgreement(iClient);
+					CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+				}
+			}
 		}
 }

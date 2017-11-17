@@ -185,7 +185,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 				else
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
 			g_hDatabase.Query(SQL_CheckError, dbQuery);
-			PunishPlayerOnMaxWarns(iClient, sReason);
+			PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
 		} else
 			PunishPlayer(iAdmin, iClient, sReason);
 	}
