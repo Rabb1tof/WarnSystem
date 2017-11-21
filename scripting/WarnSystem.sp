@@ -1,6 +1,8 @@
 #pragma semicolon 1
 #include <colors>
-#include <sdktools>
+#include <sdktools_sound>
+#include <sdktools_stringtables>
+#include <sdktools_functions>
 #include <adminmenu>
 #pragma newdecls required
 
@@ -62,8 +64,6 @@ public void OnPluginStart()
 	if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
 		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
-
-public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName, true);}
 
 public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName, false);}
 
@@ -134,7 +134,7 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
 					KickClient(iClient, " %t %t", "WS_Prefix", "WS_MaxKick");
 				}
 			}
-	}
+		}
 }
 
 public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
@@ -157,12 +157,7 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 			}
 			case 4:
-			{
-				if (IsPlayerAlive(iClient))
-					SetEntityMoveType(iClient, MOVETYPE_NONE);
-				BuildAgreement(iClient);
-				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
-			}
+				PunishmentSix(iClient);
 			case 5:
 			{
 				char sKickReason[64];
@@ -182,11 +177,16 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected punishment with custom module but module doesn't exists.");
-					if (IsPlayerAlive(iClient))
-						SetEntityMoveType(iClient, MOVETYPE_NONE);
-					BuildAgreement(iClient);
-					CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+					PunishmentSix(iClient);
 				}
 			}
 		}
+}
+
+public void PunishmentSix(int iClient)
+{
+	if (IsPlayerAlive(iClient))
+		SetEntityMoveType(iClient, MOVETYPE_NONE);
+	BuildAgreement(iClient);
+	CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
 }
