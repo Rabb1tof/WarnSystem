@@ -18,16 +18,18 @@ int g_iAccountID[MAXPLAYERS+1];
 
 //----------------------------------------------------DATABASE INITILIZING---------------------------------------------------
 
-public void InitializeDatabase() {SQL_TConnect(SQL_DBConnect, "warnsystem");}
-public void SQL_DBConnect(Handle owner, Handle hndl, const char[] sError, any data)
+public void InitializeDatabase()
 {
-	char sSQLiteError[128];
-	if(!hndl)
+	char sError[256];
+	g_hDatabase = SQL_Connect("warnsystem", false, sError, 256);
+	if(!g_hDatabase)
 	{
-		g_hDatabase = SQLite_UseDatabase("warnsystem", sSQLiteError, 256);
+		if (sError[0])
+			LogWarnings(sError);
+		g_hDatabase = SQLite_UseDatabase("warnsystem", sError, 256);
 		if(!g_hDatabase)
 			SetFailState("[WarnSystem] Could not connect to the database (%s)", sError);
-	} else g_hDatabase = view_as<Database>(hndl);
+	}
 
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
 	
@@ -146,7 +148,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) != Plugin_Continue)
 	{
 		char sEscapedAdminName[MAX_NAME_LENGTH], sEscapedClientName[MAX_NAME_LENGTH], sEscapedReason[64], 
 				dbQuery[255], TempNick[MAX_NAME_LENGTH];
@@ -195,7 +197,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) != Plugin_Continue)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -254,7 +256,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) != Plugin_Continue)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -312,7 +314,7 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);

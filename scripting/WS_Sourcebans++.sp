@@ -5,7 +5,7 @@
 
 bool g_bIsSourcebansAvailable;
 
-public Plugin myinfo =
+public Plugin myinfo = 
 {
     name = "[WarnSystem] Sourcebans support",
     author = "vadrozh",
@@ -26,13 +26,13 @@ void SetPluginDetection(const char[] sName, bool bBool) {
 public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
 {
 	if (g_bIsSourcebansAvailable)
-		SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
+		SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
 	return Plugin_Stop;
 }
 
 public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
 {
 	if (g_bIsSourcebansAvailable)
-		SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
+		SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
 	return Plugin_Stop;
 }
