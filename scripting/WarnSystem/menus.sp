@@ -1,12 +1,12 @@
 Handle g_hAdminMenu;
 int g_iTarget[MAXPLAYERS+1];
 
-public void InitializeMenu(Handle topmenu)
+public void InitializeMenu(Handle hTopMenu)
 {
-	if (topmenu == g_hAdminMenu)
+	if (hTopMenu == g_hAdminMenu)
 		return;
 	
-	g_hAdminMenu = topmenu;
+	g_hAdminMenu = hTopMenu;
 	TopMenuObject WarnCategory = FindTopMenuCategory(g_hAdminMenu, "warnmenu");
 	
 	if (!WarnCategory)
@@ -62,8 +62,21 @@ public void DisplaySomeoneTargetMenu(int iClient, MenuHandler ptrFunc) {
     Menu hMenu = new Menu(ptrFunc, MenuAction_Select|MenuAction_Cancel|MenuAction_End);
     SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
     SetMenuExitBackButton(hMenu, true);
-    AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_CONNECTED);
+    AddTargetsToMenuCustom(hMenu, iClient);
     DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
+}
+
+stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
+{
+	char sUserId[12], sName[MAX_NAME_LENGTH], sDisplay[MAX_NAME_LENGTH+12];
+	for (int i = 1; i <= MaxClients; ++i)
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && CanUserTarget(iAdmin, i))
+		{
+			GetClientName(i, sName, sizeof(sName));
+			FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
+			IntToString(GetClientUserId(i), sUserId, sizeof(sUserId));
+			hMenu.AddItem(sUserId, sDisplay);
+		}
 }
 
 public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2) 
