@@ -3,8 +3,33 @@
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
-#include <adminmenu>
+#undef REQUIRE_PLUGIN
+#undef REQUIRE_EXTENSIONS
+#tryinclude <adminmenu>
+#tryinclude <SteamWorks>
+#tryinclude <socket>
+#tryinclude <cURL>
+#define REQUIRE_PLUGINS
+#define REQUIRE_EXTENSIONS
 #pragma newdecls required
+
+//---------------------------------DEFINES--------------------------------
+#define PLUGIN_NAME         "WarnSystem"
+#define PLUGIN_AUTHOR       "vadrozh"
+#define PLUGIN_VERSION      "1.2dev2"
+#define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
+#define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
+
+#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
+#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
+#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
+#define PLUGIN_STATS_SCRIPT "add_server.php"
+
+#define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
+#define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
+
+//----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
@@ -15,8 +40,7 @@ Database g_hDatabase;
 
 int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
 
-#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
-
+#include "WarnSystem/stats.sp"
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -25,11 +49,11 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
 
 public Plugin myinfo =
 {
-	name = "WarnSystem",
-	author = "vadrozh, ecca",
-	description = "Warn players when they are doing something wrong",
-	version = "1.2",
-	url = "hlmod.ru/threads/warnsystem.42835/"
+	name = 			PLUGIN_NAME,
+	author = 		PLUGIN_AUTHOR,
+	description = 	PLUGIN_DESCRIPTION,
+	version = 		PLUGIN_VERSION,
+	url = 			PLUGIN_URL
 };
 
 //----------------------------------------------------INITIALIZING---------------------------------------------------
@@ -51,6 +75,8 @@ public void OnPluginStart()
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
+	InitializeStats();
+	
 	if (LibraryExists("adminmenu"))
 	{
 		Handle hAdminMenu;
@@ -65,15 +91,17 @@ public void OnPluginStart()
 		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
 
-public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName, false);}
-
-void SetPluginDetection(const char[] sName, bool bBool) {
-	if (StrEqual(sName, "adminmenu") && !bBool)
+public void OnLibraryAdded(const char[] sName){STATS_OnLibraryAdded(sName);}
+public void OnLibraryRemoved(const char[] sName)
+{
+	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
+	STATS_OnLibraryRemoved(sName);
 }
 
 public void OnMapStart()
 {
+	STATS_AddServer(APIKEY, PLUGIN_VERSION);
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -92,7 +120,7 @@ public void OnMapStart()
 	}
 }
 
-public void OnAdminMenuReady(Handle topmenu) {InitializeMenu(topmenu);}
+public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
 
@@ -117,21 +145,21 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
 		switch (g_iMaxPunishment)
 		{
 			case 1:
-				KickClient(iClient, " %t %t", "WS_Prefix", "WS_MaxKick");
+				KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
 			case 2:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_MaxBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
 				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
 			case 3:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_MaxBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
 				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected max punishment with custom module but module doesn't exists.  Client kicked.");
-					KickClient(iClient, " %t %t", "WS_Prefix", "WS_MaxKick");
+					KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
 				}
 			}
 		}
@@ -143,37 +171,37 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 		switch (g_iPunishment)
 		{
 			case 1:
-				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			case 2:
 			{
 				if (IsPlayerAlive(iClient))
 					SlapPlayer(iClient, g_iSlapDamage, true);
-				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 3:
 			{
 				if (IsPlayerAlive(iClient))
 					ForcePlayerSuicide(iClient);
-				CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 4:
 				PunishmentSix(iClient);
 			case 5:
 			{
 				char sKickReason[64];
-				FormatEx(sKickReason, sizeof(sKickReason), " %t %t", "WS_Prefix", "WS_PunishKick", sReason);
+				FormatEx(sKickReason, sizeof(sKickReason), "[WarnSystem] %t", "WS_PunishKick", sReason);
 				KickClient(iClient, sKickReason);
 			}
 			case 6:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_PunishBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
 				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
 			case 7:
 			{
 				char sBanReason[64];
-				FormatEx(sBanReason, sizeof(sBanReason), " %t %t", "WS_Prefix", "WS_PunishBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected punishment with custom module but module doesn't exists.");
@@ -188,5 +216,5 @@ public void PunishmentSix(int iClient)
 	if (IsPlayerAlive(iClient))
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient);
-	CPrintToChat(iClient, " %t %t", "WS_Prefix", "WS_Message");
+	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }

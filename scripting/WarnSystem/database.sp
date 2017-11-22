@@ -42,13 +42,10 @@ public void InitializeDatabase()
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			g_iServerID = -1;
+			STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
+			
 			g_hDatabase.SetCharset("utf8");
 			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
-			
-			int array[24];
-			array[0] = GetConVarInt(FindConVar("hostip"));
-			FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d:%d", g_sAddress[3] + 0, g_sAddress[2] + 0, g_sAddress[1] + 0, g_sAddress[0] + 0, GetConVarInt(FindConVar("hostport")));
-			
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			SQL_UnlockDatabase(g_hDatabase);
 		} else {
@@ -137,7 +134,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	{
 		g_iWarnings[iClient] = hDatabaseResults.RowCount;
 		if (g_bPrintToAdmins && !g_bIsLateLoad)
-			PrintToAdmins(" %t %t", "WS_Prefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient]);
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient]);
 	} else 
 		g_iWarnings[iClient] = 0;
 	
@@ -173,9 +170,9 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 			} else
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) issued a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
 		
@@ -243,13 +240,13 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+		CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) removed a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------RESET WARNS---------------------------------------------------
@@ -302,12 +299,12 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		//Delete data. Or make it expired?
 		
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) reseted warnings on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------CHECK PLAYER WARNS---------------------------------------------------
@@ -348,12 +345,12 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	
 	if (!hDatabaseResults.RowCount)
 	{
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
-	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
+	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
 	
 	char sClient[64], sAdmin[64], sReason[64], sTimeFormat[32];
 	int iDate, iExpired, i;
