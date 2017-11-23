@@ -18,41 +18,38 @@ int g_iAccountID[MAXPLAYERS+1];
 
 //----------------------------------------------------DATABASE INITILIZING---------------------------------------------------
 
-public void InitializeDatabase() {SQL_TConnect(SQL_DBConnect, "warnsystem");}
-public void SQL_DBConnect(Handle owner, Handle hndl, const char[] sError, any data)
+public void InitializeDatabase()
 {
-	char sSQLiteError[128];
-	if(!hndl)
+	char sError[256];
+	g_hDatabase = SQL_Connect("warnsystem", false, sError, 256);
+	if(!g_hDatabase)
 	{
-		g_hDatabase = SQLite_UseDatabase("warnsystem", sSQLiteError, 256);
+		if (sError[0])
+			LogWarnings(sError);
+		g_hDatabase = SQLite_UseDatabase("warnsystem", sError, 256);
 		if(!g_hDatabase)
 			SetFailState("[WarnSystem] Could not connect to the database (%s)", sError);
-	} else g_hDatabase = view_as<Database>(hndl);
+	}
 
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
-	
-	SQL_LockDatabase(g_hDatabase);
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
 	{
+		SQL_LockDatabase(g_hDatabase);
 		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
 		SQL_UnlockDatabase(g_hDatabase);
 	} else
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			g_iServerID = -1;
+			STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
+			
 			g_hDatabase.SetCharset("utf8");
+			SQL_LockDatabase(g_hDatabase);
 			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
-			
-			int array[24];
-			array[0] = GetConVarInt(FindConVar("hostip"));
-			FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d:%d", g_sAddress[3] + 0, g_sAddress[2] + 0, g_sAddress[1] + 0, g_sAddress[0] + 0, GetConVarInt(FindConVar("hostport")));
-			
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			SQL_UnlockDatabase(g_hDatabase);
-		} else {
-			SQL_UnlockDatabase(g_hDatabase);
+		} else
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
-		}
 	
 	if (g_bIsLateLoad)
 	{
@@ -111,9 +108,7 @@ public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, co
 
 public void LoadPlayerData(int iClient)
 {
-	if(!g_hDatabase) return;
-	
-	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient) && g_hDatabase)
 	{
 		char dbQuery[255];
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
@@ -135,7 +130,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	{
 		g_iWarnings[iClient] = hDatabaseResults.RowCount;
 		if (g_bPrintToAdmins && !g_bIsLateLoad)
-			PrintToAdmins(" %t %t", "WS_Prefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient]);
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient]);
 	} else 
 		g_iWarnings[iClient] = 0;
 	
@@ -146,7 +141,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		char sEscapedAdminName[MAX_NAME_LENGTH], sEscapedClientName[MAX_NAME_LENGTH], sEscapedReason[64], 
 				dbQuery[255], TempNick[MAX_NAME_LENGTH];
@@ -171,9 +166,17 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 			} else
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
+		}
+		
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) issued a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientWarn(iAdmin, iClient, sReason);
 		
@@ -185,7 +188,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 				else
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
 			g_hDatabase.Query(SQL_CheckError, dbQuery);
-			PunishPlayerOnMaxWarns(iClient, sReason);
+			PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
 		} else
 			PunishPlayer(iAdmin, iClient, sReason);
 	}
@@ -195,7 +198,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -241,20 +244,28 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
-		CPrintToChatAll(" %t %t", "WS_Prefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogUnWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
+		}
+		
+		if (g_bLogWarnings)
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) removed a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------RESET WARNS---------------------------------------------------
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
@@ -300,19 +311,27 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		//Delete data. Or make it expired?
 		
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
+		}
+		
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
-			LogWarnings(" %t %t", "WS_Prefix", "WS_LogResetWarn", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
+			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) reseted warnings on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------CHECK PLAYER WARNS---------------------------------------------------
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
 	{
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
@@ -346,12 +365,12 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 	
 	if (!hDatabaseResults.RowCount)
 	{
-		CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
+		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
-	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	CPrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
+	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
 	
 	char sClient[64], sAdmin[64], sReason[64], sTimeFormat[32];
 	int iDate, iExpired, i;

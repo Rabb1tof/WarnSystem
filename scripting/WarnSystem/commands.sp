@@ -1,9 +1,9 @@
 public void InitializeCommands()
 {
-	RegAdminCmd("sm_warn", Command_WarnPlayer, g_iWarnAdminFlag);
-	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, g_iUnWarnAdminFlag);
-	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, g_iCheckWarnAdminFlag);
-	RegAdminCmd("sm_resetwarn", Command_WarnReset, g_iResetWarnAdminFlag);
+	RegAdminCmd("sm_warn", Command_WarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, ADMFLAG_GENERIC);
+	RegAdminCmd("sm_resetwarn", Command_WarnReset, ADMFLAG_GENERIC);
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)
@@ -13,16 +13,21 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_WarnArguments");
 		return Plugin_Handled;
 	}
-	char sArgument[32], sReason[64], sBuffer[64];
-	GetCmdArg(1, sArgument, sizeof(sArgument));
-	for(int i = 2; i <= iArgs; ++i)
-	{
-		GetCmdArg(i, sBuffer, sizeof(sBuffer));
-		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
-	}
-	int iTarget = FindTarget(iClient, sArgument, true, true);
-	if (iTarget)
-		WarnPlayer(iClient, iTarget, sReason);
+	char sBuffer[128], sReason[64];
+	GetCmdArg(1, sBuffer, sizeof(sBuffer));
+	int iTarget = FindTarget(iClient, sBuffer, true, true);
+	if (!iTarget)
+		return Plugin_Handled;
+	
+	GetCmdArg(2, sReason, sizeof(sReason));
+	if (iArgs > 2)
+		for (int i = 3; i <= iArgs; ++i)
+		{
+			GetCmdArg(i, sBuffer, sizeof(sBuffer));
+			Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
+		}
+	
+	WarnPlayer(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -33,16 +38,21 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_UnWarnArguments");
 		return Plugin_Handled;
 	}
-	char sArgument[32], sReason[64], sBuffer[64];
-	GetCmdArg(1, sArgument, sizeof(sArgument));
-	for(int i = 2; i <= iArgs; ++i)
-	{
-		GetCmdArg(i, sBuffer, sizeof(sBuffer));
-		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
-	}
-	int iTarget = FindTarget(iClient, sArgument, true, true);
-	if (iTarget)
-		UnWarnPlayer(iClient, iTarget, sReason);
+	char sBuffer[128], sReason[64];
+	GetCmdArg(1, sBuffer, sizeof(sBuffer));
+	int iTarget = FindTarget(iClient, sBuffer, true, true);
+	if (!iTarget)
+		return Plugin_Handled;
+	
+	GetCmdArg(2, sReason, sizeof(sReason));
+	if (iArgs > 2)
+		for (int i = 3; i <= iArgs; ++i)
+		{
+			GetCmdArg(i, sBuffer, sizeof(sBuffer));
+			Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
+		}
+	
+	UnWarnPlayer(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -58,16 +68,21 @@ public Action Command_WarnReset(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_ResetWarnArguments");
 		return Plugin_Handled;
 	}
-	char sArgument[32], sReason[64], sBuffer[64];
-	GetCmdArg(1, sArgument, sizeof(sArgument));
-	for(int i = 2; i <= iArgs; ++i)
-	{
-		GetCmdArg(i, sBuffer, sizeof(sBuffer));
-		Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
-	}
-	int iTarget = FindTarget(iClient, sArgument, true, true);
-	if (iTarget)
-		ResetPlayerWarns(iClient, iTarget, sReason);
+	char sBuffer[128], sReason[64];
+	GetCmdArg(1, sBuffer, sizeof(sBuffer));
+	int iTarget = FindTarget(iClient, sBuffer, true, true);
+	if (!iTarget)
+		return Plugin_Handled;
+	
+	GetCmdArg(2, sReason, sizeof(sReason));
+	if (iArgs > 2)
+		for (int i = 3; i <= iArgs; ++i)
+		{
+			GetCmdArg(i, sBuffer, sizeof(sBuffer));
+			Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
+		}
+	
+	ResetPlayerWarns(iClient, iTarget, sReason);
 	return Plugin_Handled;
 }
 
@@ -83,10 +98,11 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_CheckWarnArguments");
 		return Plugin_Handled;
 	}
-	char sArgument[32];
-	GetCmdArg(1, sArgument, sizeof(sArgument));
-	int iTarget = FindTarget(iClient, sArgument, true, true);
-	if (iTarget)
-		CheckPlayerWarns(iClient, iTarget);
+	char sBuffer[128];
+	GetCmdArg(1, sBuffer, sizeof(sBuffer));
+	int iTarget = FindTarget(iClient, sBuffer, true, true);
+	if (!iTarget)
+		return Plugin_Handled;
+	CheckPlayerWarns(iClient, iTarget);
 	return Plugin_Handled;
 }
