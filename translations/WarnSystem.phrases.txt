@@ -7,7 +7,7 @@
 	
 	"WS_ColoredPrefix"
 	{
-		"en"		"{lightred}[WarnSystem]{default}"
+		"en"		"{lightgreen}[WarnSystem]{default}"
 	}
 	
 	//---------------------------------WarnSystem.sp----------------------------
@@ -88,6 +88,17 @@
 		"nl"		"{olive}{1} heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
 	}
 	
+	"WS_WarnPlayerPersonal"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{olive}{1} issued a warning to you with reason: {2}"
+		"ru"		"{olive}{1} выдал вам предупреждение. Причина: {2}"
+		"fr"		"{olive}{1} a donne un avertissement pour motif: {2}"
+		"de"		"{olive}{1} wurde mit gewarnt mit dem Grund: {2}"
+		"sv"		"{olive}{1} utfärdade en varning på med anledningen: {2}"
+		"nl"		"{olive}{1} heeft een waarschuwing aan gegegeven met de reden: {2}"
+	}
+	
 	"WS_UnWarnPlayer"
 	{
 		"#format"	"{1:N},{2:N},{3:s}"
@@ -97,6 +108,17 @@
 		"de"		"{olive}{1} Warnung von Spieler {2} zurückgenommen. Grund: {3}"
 		"sv"		"{olive}{1} tog bort en varning på {2} med anledningen: {3}"
 		"nl"		"{olive}{1} verwijderde waarschuwing van {2} met de reden: {3}"
+	}
+	
+	"WS_UnWarnPlayerPersonal"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{olive}{1} removed your warning with reason: {2}"
+		"ru"		"{olive}{1} снял вам предупреждение. Причина: {2}"
+		"fr"        "{olive}{1} a supprime un avertissement de pour motif: {2}"
+		"de"		"{olive}{1} Warnung von Spieler zurückgenommen. Grund: {2}"
+		"sv"		"{olive}{1} tog bort en varning på med anledningen: {2}"
+		"nl"		"{olive}{1} verwijderde waarschuwing van met de reden: {2}"
 	}
 	
 	"WS_NotWarned"
@@ -119,6 +141,17 @@
 		"de"		"{olive}{1} {2} Wrnungen wurden zurückgesetzt! Grund: {3}"
 		"sv"		"{olive}{1} återställde {2}'s varningar med anleningen: {3}"
 		"nl" 		"{olive}{1} resetde {2}'s waarschuwingen met de reden: {3}"
+	}
+	
+	"WS_ResetPlayerPersonal"
+	{
+		"#format"	"{1:N},{2:s}"
+		"en"		"{olive}{1} reseted your warnings with reason: {2}"
+		"ru"		"{olive}{1} сбросил ваши предупреждения. Причина: {2}"
+		"fr"        "{olive}{1} suppression des avertissements de pour motif: {2}"
+		"de"		"{olive}{1} Wrnungen wurden zurückgesetzt! Grund: {2}"
+		"sv"		"{olive}{1} återställde varningar med anleningen: {2}"
+		"nl" 		"{olive}{1} resetde waarschuwingen met de reden: {2}"
 	}
 	
 	"WS_Console"
@@ -229,7 +262,7 @@
 	"WS_AgreementMessage"
 	{
 		"en"		"{blue}Thank you for understanding, you can now play again."
-		"ru"		"{blue}Спасибо за понимание, вы можете играть снова."
+		"ru"		"{blue}Спасибо за понимание, вы можете играть дальше."
 		"fr"        "{blue}Merci de ta comprehension, tu peux jouer a nouveau."
 		"de"        "{blue}Vielen Dank für Dein Verständnis. Du darfst nun wieder spielen."
 		"sv"		"{blue}Tack för din förståelse, du kan nu spela igen."

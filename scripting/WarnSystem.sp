@@ -16,7 +16,7 @@
 //---------------------------------DEFINES--------------------------------
 #define PLUGIN_NAME         "WarnSystem"
 #define PLUGIN_AUTHOR       "vadrozh"
-#define PLUGIN_VERSION      "1.2dev2"
+#define PLUGIN_VERSION      "1.2"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -27,8 +27,8 @@
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
 #define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
-#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 //----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
@@ -102,6 +102,8 @@ public void OnLibraryRemoved(const char[] sName)
 public void OnMapStart()
 {
 	STATS_AddServer(APIKEY, PLUGIN_VERSION);
+	for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -131,7 +133,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
 		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
-		{
+		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
         }
