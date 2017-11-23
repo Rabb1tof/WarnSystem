@@ -1,8 +1,8 @@
 #if defined _warnsystem_included
   #endinput
 #endif
-#define _warnsystem_included
 
+#define _warnsystem_included
 #define APIVERSION "1.2dev2"
 
 public SharedPlugin __pl_WarnSystem = {
