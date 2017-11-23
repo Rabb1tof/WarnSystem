@@ -32,10 +32,9 @@ public void InitializeDatabase()
 	}
 
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
-	
-	SQL_LockDatabase(g_hDatabase);
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
 	{
+		SQL_LockDatabase(g_hDatabase);
 		g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
 		SQL_UnlockDatabase(g_hDatabase);
 	} else
@@ -45,13 +44,12 @@ public void InitializeDatabase()
 			STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
 			
 			g_hDatabase.SetCharset("utf8");
+			SQL_LockDatabase(g_hDatabase);
 			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			SQL_UnlockDatabase(g_hDatabase);
-		} else {
-			SQL_UnlockDatabase(g_hDatabase);
+		} else
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
-		}
 	
 	if (g_bIsLateLoad)
 	{
@@ -110,9 +108,7 @@ public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, co
 
 public void LoadPlayerData(int iClient)
 {
-	if(!g_hDatabase) return;
-	
-	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient) && g_hDatabase)
 	{
 		char dbQuery[255];
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
@@ -170,7 +166,15 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 			} else
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
-		CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
+		}
+		
 		if(g_bLogWarnings)
 			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) issued a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
@@ -240,8 +244,16 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
-		CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-		if(g_bLogWarnings)
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
+		}
+		
+		if (g_bLogWarnings)
 			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) removed a warning on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
@@ -299,7 +311,15 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		//Delete data. Or make it expired?
 		
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		if (g_bPrintToChat)
+			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+		else
+		{
+			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+			if (iClient != iAdmin)
+				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
+		}
+		
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
 			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: %i | IP: %s) reseted warnings on PLAYER (NICK: %N | STEAMID32: %i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin], g_sClientIP[iAdmin], iClient, g_iAccountID[iClient], g_sClientIP[iClient], sReason);
