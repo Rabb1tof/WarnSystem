@@ -1,0 +1,23 @@
+language: c
+
+env:
+    - SMVERSION=1.8
+    - SMVERSION=1.9
+
+matrix:
+    fast_finish: true
+
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install gcc-multilib
+    - sudo apt-get install lib32stdc++6
+
+before_script:
+    - wget -q "http://www.sourcemod.net/latest.php?version=$SMVERSION&os=linux" -O sourcemod.tar.gz;
+    - tar -xzf sourcemod.tar.gz
+    - cd scripting/
+    - chmod +x spcomp
+    - chmod +x compile.sh
+
+script: 
+- ./compile.sh WarnSystem.sp
