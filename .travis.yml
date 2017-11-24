@@ -20,4 +20,4 @@ before_script:
     - chmod +x compile.sh
 
 script: 
-- ./compile.sh WarnSystem.sp
+- ./compile.sh vadrozh/WarnSystem/scripting/WarnSystem.sp
