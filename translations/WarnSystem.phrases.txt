@@ -99,6 +99,12 @@
 		"nl"		"{olive}{1} heeft een waarschuwing aan gegegeven met de reden: {2}"
 	}
 	
+	"WS_CantTargetYourself"
+	{
+		"en"		"{lightred}Can't target yourself."
+		"ru"		"{lightred}Нельзя выбрать самого себя."
+	}
+	
 	"WS_UnWarnPlayer"
 	{
 		"#format"	"{1:N},{2:N},{3:s}"

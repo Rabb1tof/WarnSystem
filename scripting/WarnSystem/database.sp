@@ -143,6 +143,11 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
 	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
+		if (iAdmin == iClient)
+		{
+			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			return;
+		}
 		char sEscapedAdminName[MAX_NAME_LENGTH], sEscapedClientName[MAX_NAME_LENGTH], sEscapedReason[64], 
 				dbQuery[255], TempNick[MAX_NAME_LENGTH];
 		int iTime = GetTime();
@@ -171,8 +176,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[64])
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
-			if (iClient != iAdmin)
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
+			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
 		}
 		
 		if(g_bLogWarnings)
@@ -200,6 +204,12 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[64])
 {
 	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
+		if (iAdmin == iClient)
+		{
+			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			return;
+		}
+		
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		
@@ -249,8 +259,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-			if (iClient != iAdmin)
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
+			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
 		}
 		
 		if (g_bLogWarnings)
@@ -267,6 +276,11 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[64])
 {
 	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
+		if (iAdmin == iClient)
+		{
+			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			return;
+		}
 		char dbQuery[255];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		
@@ -316,8 +330,7 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
-			if (iClient != iAdmin)
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
+			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
 		}
 		
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);

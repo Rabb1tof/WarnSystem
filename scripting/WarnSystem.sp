@@ -16,7 +16,7 @@
 //---------------------------------DEFINES--------------------------------
 #define PLUGIN_NAME         "WarnSystem"
 #define PLUGIN_AUTHOR       "vadrozh"
-#define PLUGIN_VERSION      "1.2"
+#define PLUGIN_VERSION      "1.2.1"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
