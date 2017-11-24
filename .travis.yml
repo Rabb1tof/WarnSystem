@@ -19,5 +19,6 @@ before_script:
     - chmod +x spcomp
     - chmod +x compile.sh
 
-script: 
-- ./compile.sh vadrozh/WarnSystem/scripting/WarnSystem.sp
+script:
+- cd ../../../scripting/
+- ./compile.sh WarnSystem.sp
