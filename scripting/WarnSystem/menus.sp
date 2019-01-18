@@ -396,16 +396,21 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 
 public int CheckPlayerWarnsMenu(Handle hMenu, MenuAction action, int param1, int iItem)
 {
-    if (action == MenuAction_Select)
-    {
-        char szDBQuery[512];
-        int iID = StringToInt(hMenu.GetItem(iItem, szID, sizeof(szID)));
+    switch(action){
         
-        FormatEx(szDBQuery, sizeof(szDBQuery),  g_sSQL_GetInfoWarn, iID);
-        g_hDatabase.Query(szDBQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
-    } 
-    else if (action == MenuAction_End)
-        CloseHandle(hMenu);
+        case MenuAction_Select: {
+            char szDBQuery[512];
+            int iID = StringToInt(hMenu.GetItem(iItem, szID, sizeof(szID)));
+            
+            FormatEx(szDBQuery, sizeof(szDBQuery),  g_sSQL_GetInfoWarn, iID);
+            g_hDatabase.Query(szDBQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
+        } 
+        case MenuAction_End:
+            CloseHandle(hMenu);
+        case MenuAction_Cancel:
+            CloseHandle(hMenu);
+            
+        
 }
 
 //-------------------------------------CREATE MENU WITH INFORMATION ABOUT SELECTED WARN------------------------------------------
@@ -438,5 +443,15 @@ void DisplayInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
 	
     hMenu.ExitBackButton = true;
+    hMenu.ExitButton = false;
 	hMenu.Display(iAdmin, MENU_TIME_FOREVER);
+}
+
+public int GetInfoWarnMenu_CallBack(Handle hMenu, MenuAction action, int param1, int iItem)
+{
+    switch(action){
+        case MenuAction_End:
+            CloseHandle(hMenu);
+        case MenuAction_Cancel: 
+            CloseHandle(hMenu);
 }
