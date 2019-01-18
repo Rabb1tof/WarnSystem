@@ -382,9 +382,9 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	int iDate, iID;
 	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
 	hMenu.SetTitle("%T:\n", "WS_CPWTitle", iClient);
-	//Ya, nice output
+	//Ya, nice output *NOEW TO MENU, BITCHES*!
 	
-	while (hDatabaseResults.FetchRow()) // Сделай вывод всех сначала в меню, а потом выбор нужной, то, что ниже - не канает.
+	while (hDatabaseResults.FetchRow())
 	{
         iID = hDatabaseResults.FetchInt(0);
         IntToString(iID, szID, sizeof(szID));
