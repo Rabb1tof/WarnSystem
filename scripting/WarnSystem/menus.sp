@@ -353,7 +353,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 
 //------------------------------------------CREATE MENU WITH ALL WARNS OF TARGET---------------------------------------------
 
-void RenderCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
+void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 {
 	int iAdmin, iClient;
 	
@@ -410,7 +410,7 @@ public int CheckPlayerWarnsMenu(Handle hMenu, MenuAction action, int param1, int
 
 //-------------------------------------CREATE MENU WITH INFORMATION ABOUT SELECTED WARN------------------------------------------
 
-void RenderInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
+void DisplayInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
 {
     char szClient[64], szAdmin[64], szReason[64], szTimeFormat[32], szBuffer[80];
     int iDate, iExpired;
