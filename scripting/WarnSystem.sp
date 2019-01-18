@@ -187,7 +187,7 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 4:
-				PunishmentSix(iClient);
+				PunishmentSix(iClient, iAdmin, sReason);
 			case 5:
 			{
 				char sKickReason[64];
@@ -207,16 +207,17 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected punishment with custom module but module doesn't exists.");
-					PunishmentSix(iClient);
+					PunishmentSix(iClient, iAdmin, sReason);
 				}
 			}
 		}
+
 }
 
-public void PunishmentSix(int iClient)
+public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 {
 	if (IsPlayerAlive(iClient))
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
-	BuildAgreement(iClient);
+	BuildAgreement(iClient, iAdmin, szReason);
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }

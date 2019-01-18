@@ -314,7 +314,7 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 	}
 }
 
-public void BuildAgreement(int iClient)
+public void BuildAgreement(int iClient, int iAdmin, char[] szReason)
 {
 	Handle hFilePath = OpenFile(g_sPathAgreePanel, "rt");
 	if (!hFilePath)
@@ -329,8 +329,13 @@ public void BuildAgreement(int iClient)
 	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementTitle", iClient);
 	SetPanelTitle(hMenu, sBuffer);
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
-	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer)))
-		DrawPanelText(hMenu, sBuffer);
+	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
+        char szAdmin[20];
+        GetClientName(iClient, szAdmin, sizeof(szAdmin));
+        ReplaceString(sBuffer, sizeof(sBuffer), "{ADMIN}", szAdmin, false);
+        ReplaceString(sBuffer, sizeof(sBuffer), "{REASON}", szReason, false);
+        DrawPanelText(hMenu, sBuffer);
+    }
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
 	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementAgree", iClient);
 	DrawPanelItem(hMenu, sBuffer);
