@@ -184,6 +184,19 @@
 		"en"		"Select option"
 		"ru"		"Выберите опцию"
 	}
+    
+    "WS_CPWTitle"
+    {
+        "#format"   "{1:N}"
+        "en"        "{1}`s warning(s)"
+        "ru"        "Предупреждения {1}"
+    }
+    
+    "WS_InfoWarn"
+    {
+        "en"        "Details of warning"
+        "ru"        "Подробности предупреждения"
+    }
 	
 	"WS_AdminMenuWarnTitle"
 	{
