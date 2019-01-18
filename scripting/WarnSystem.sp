@@ -6,9 +6,9 @@
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
-#tryinclude <SteamWorks>
-#tryinclude <socket>
-#tryinclude <cURL>
+//#tryinclude <SteamWorks>
+//#tryinclude <socket>
+//#tryinclude <cURL>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 #pragma newdecls required
@@ -20,10 +20,10 @@
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
-#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
-#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
-#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
-#define PLUGIN_STATS_SCRIPT "add_server.php"
+//#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
+//#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
+//#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
+//#define PLUGIN_STATS_SCRIPT "add_server.php"
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
 #define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
@@ -40,7 +40,7 @@ Database g_hDatabase;
 
 int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
 
-#include "WarnSystem/stats.sp"
+//#include "WarnSystem/stats.sp"
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -75,7 +75,7 @@ public void OnPluginStart()
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
-	InitializeStats();
+	//InitializeStats();
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -91,17 +91,17 @@ public void OnPluginStart()
 		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
 
-public void OnLibraryAdded(const char[] sName){STATS_OnLibraryAdded(sName);}
+//public void OnLibraryAdded(const char[] sName){STATS_OnLibraryAdded(sName);}
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
-	STATS_OnLibraryRemoved(sName);
+	//STATS_OnLibraryRemoved(sName);
 }
 
 public void OnMapStart()
 {
-	STATS_AddServer(APIKEY, PLUGIN_VERSION);
+	//STATS_AddServer(APIKEY, PLUGIN_VERSION);
 	for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);
 	if(g_bWarnSound)

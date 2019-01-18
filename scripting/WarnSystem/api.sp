@@ -27,7 +27,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	
 	g_bIsLateLoad = bLate;
 	
-	STATS_MarkNativesAsOptional();
+	//STATS_MarkNativesAsOptional();
 	
 	return APLRes_Success;
 }

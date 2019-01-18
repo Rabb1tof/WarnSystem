@@ -42,7 +42,7 @@ public void InitializeDatabase()
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			g_iServerID = -1;
-			STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
+			//STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
 			
 			g_hDatabase.SetCharset("utf8");
 			SQL_LockDatabase(g_hDatabase);
@@ -368,20 +368,20 @@ public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResult
 		return;
 	}
 	
-	RenderCheckWarnsMenu(hDatabaseResults, hCheckData); // Transfer to menus.sp
+	DisplayCheckWarnsMenu(hDatabaseResults, hCheckData); // Transfer to menus.sp
 }
 
 //------------------------------------------------GET INFO ABOUT WARN--------------------------------------------------------
 
 public void SQL_GetInfoWarn(Database hDatabase, DBResultSet hDatabaseResults, const char[] szError, any iAdmin)
 {
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
+	if (hDatabaseResults == INVALID_HANDLE || szError[0])
 	{
-		LogWarnings("[WarnSystem] SQL_GetInfoWarn - error while working with data (%s)", sError);
+		LogWarnings("[WarnSystem] SQL_GetInfoWarn - error while working with data (%s)", szError);
 		return;
 	}
 	
-	RenderInfoWarn(hDatabaseResults, iAdmin); // Transfer to menus.sp
+	DisplayInfoAboutWarn(hDatabaseResults, iAdmin); // Transfer to menus.sp
 }
 
 /* public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hCheckData)

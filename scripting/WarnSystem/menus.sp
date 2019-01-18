@@ -374,48 +374,52 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
 	
 	char szAdmin[64], szTimeFormat[32], szBuffer[80], szID[13];
-	int iDate;
+	int iDate, iID;
 	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
 	hMenu.SetTitle("%T:\n", "WS_CPWTitle", iClient);
 	//Ya, nice output
 	
 	while (hDatabaseResults.FetchRow()) // Сделай вывод всех сначала в меню, а потом выбор нужной, то, что ниже - не канает.
 	{
-		szID = IntToString(hDatabaseResults.FetchInt(0));
-		SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
-		iDate = hDatabaseResults.FetchInt(2);
-		
-		
-		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
-		FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
-		menu.AddItem(szID, szBuffer);
+        iID = hDatabaseResults.FetchInt(0);
+        IntToString(iID, szID, sizeof(szID));
+        SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
+        iDate = hDatabaseResults.FetchInt(2);
+        
+        
+        FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
+        FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
+        hMenu.AddItem(szID, szBuffer);
 	}
 	hMenu.ExitBackButton = true;
 	hMenu.Display(iAdmin, MENU_TIME_FOREVER);
 }
 
-public int CheckPlayerWarnsMenu(Handle hMenu, MenuAction action, int param1, int iItem)
+public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int iItem)
 {
     switch(action){
         
         case MenuAction_Select: {
             char szDBQuery[512];
-            int iID = StringToInt(hMenu.GetItem(iItem, szID, sizeof(szID)));
+            char szID[13];
+            int iID;
+            hMenu.GetItem(iItem, szID, sizeof(szID));
+            
             
             FormatEx(szDBQuery, sizeof(szDBQuery),  g_sSQL_GetInfoWarn, iID);
-            g_hDatabase.Query(szDBQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
+            g_hDatabase.Query(SQL_GetInfoWarn, szDBQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
         } 
         case MenuAction_End:
             CloseHandle(hMenu);
         case MenuAction_Cancel:
             CloseHandle(hMenu);
             
-        
+    }
 }
 
 //-------------------------------------CREATE MENU WITH INFORMATION ABOUT SELECTED WARN------------------------------------------
 
-void DisplayInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
+void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 {
     char szClient[64], szAdmin[64], szReason[64], szTimeFormat[32], szBuffer[80];
     int iDate, iExpired;
@@ -424,19 +428,17 @@ void DisplayInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
     hMenu.SetTitle("%T:\n", "WS_InfoWarn");
     
     SQL_FetchString(hDatabaseResults, 0, szClient, sizeof(szClient));
-    FormatEx(szBuffer, sizeof(szBuffer), szClient);
+    FormatEx(szBuffer, sizeof(szBuffer), "Nick: %s", szClient);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
-    FormatEx(szBuffer, sizeof(szBuffer), szAdmin);
+    FormatEx(szBuffer, sizeof(szBuffer), "Admin: %s", szAdmin);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     SQL_FetchString(hDatabaseResults, 2, szReason, sizeof(szReason));
-    FormatEx(szBuffer, sizeof(szBuffer), szReason);
+    FormatEx(szBuffer, sizeof(szBuffer), "Reason: %s",szReason);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     iDate = hDatabaseResults.FetchInt(3);
-    FormatEx(szBuffer, sizeof(szBuffer), iDate);
-    hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     iExpired = hDatabaseResults.FetchInt(4);
-    FormatEx(szBuffer, sizeof(szBuffer), iExpired);
+    FormatEx(szBuffer, sizeof(szBuffer), "Expired: %d", iExpired);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
     FormatEx(szBuffer, sizeof(szBuffer), szTimeFormat);
@@ -444,14 +446,15 @@ void DisplayInfoWarn(DBResultSet hDatabaseResults, any iAdmin)
 	
     hMenu.ExitBackButton = true;
     hMenu.ExitButton = false;
-	hMenu.Display(iAdmin, MENU_TIME_FOREVER);
+    hMenu.Display(iAdmin, MENU_TIME_FOREVER);
 }
 
-public int GetInfoWarnMenu_CallBack(Handle hMenu, MenuAction action, int param1, int iItem)
+public int GetInfoWarnMenu_CallBack(Menu hMenu, MenuAction action, int param1, int iItem)
 {
     switch(action){
         case MenuAction_End:
             CloseHandle(hMenu);
         case MenuAction_Cancel: 
             CloseHandle(hMenu);
+    }
 }
