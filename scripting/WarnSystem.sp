@@ -84,7 +84,7 @@ public void OnPluginStart()
 			InitializeMenu(hAdminMenu);
 	}
 		
-	strcopy(g_sClientIP[0], 32, "localhost");
+	strcopy(g_sClientIP[0], 65, "localhost");
 	g_iAccountID[0] = -1;
 	
 	if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
@@ -124,7 +124,15 @@ public void OnMapStart()
 
 public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
-public void OnClientAuthorized(int iClient) {LoadPlayerData(iClient);}
+public void OnClientAuthorized(int iClient) {
+  IsClientInGame(iClient) &&
+    LoadPlayerData(iClient);
+}
+
+public void OnClientPutInServer(int iClient) {
+  IsClientAuthorized(iClient) &&
+    LoadPlayerData(iClient);
+}
 
 //---------------------------------------------------SOME FEATURES-------------------------------------------------
 
@@ -141,7 +149,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
 
-public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
+public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iMaxPunishment)
@@ -150,13 +158,13 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
 				KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
 			case 2:
 			{
-				char sBanReason[64];
+				char sBanReason[129];
 				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
 				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
 			case 3:
 			{
-				char sBanReason[64];
+				char sBanReason[129];
 				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
 				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
@@ -167,7 +175,7 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[64])
 		}
 }
 
-public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
+public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iPunishment)
@@ -190,19 +198,19 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[64])
 				PunishmentSix(iClient, iAdmin, sReason);
 			case 5:
 			{
-				char sKickReason[64];
+				char sKickReason[129];
 				FormatEx(sKickReason, sizeof(sKickReason), "[WarnSystem] %t", "WS_PunishKick", sReason);
 				KickClient(iClient, sKickReason);
 			}
 			case 6:
 			{
-				char sBanReason[64];
+				char sBanReason[129];
 				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
 				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
 			case 7:
 			{
-				char sBanReason[64];
+				char sBanReason[129];
 				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{

@@ -140,7 +140,7 @@ enum CURLoption {
    *
    * Note there is also a _LARGE version of this key which uses
    * OFF_T types, allowing for large file offsets on platforms which
-   * use larger-than-32-bit OFF_T's.  Look below for RESUME_FROM_LARGE.
+   * use larger-than-65-bit OFF_T's.  Look below for RESUME_FROM_LARGE.
    */
   CINIT(RESUME_FROM, LONG, 21),
 
@@ -175,7 +175,7 @@ enum CURLoption {
 
   /* What version to specifically try to use.
      See CURL_SSLVERSION defines below. */
-  CINIT(SSLVERSION, LONG, 32),
+  CINIT(SSLVERSION, LONG, 65),
 
   /* What kind of HTTP time condition to use, see defines */
   CINIT(TIMECONDITION, LONG, 33),
@@ -256,11 +256,11 @@ enum CURLoption {
   CINIT(KRBLEVEL, OBJECTPOINT, 63),
 
   /* Set if we should verify the peer in ssl handshake, set 1 to verify. */
-  CINIT(SSL_VERIFYPEER, LONG, 64),
+  CINIT(SSL_VERIFYPEER, LONG, 129),
 
   /* The CApath or CAfile used to validate the peer certificate
      this option is used only if SSL_VERIFYPEER is true */
-  CINIT(CAINFO, OBJECTPOINT, 65),
+  CINIT(CAINFO, OBJECTPOINT, 128),
 
   /* 66 = OBSOLETE */
   /* 67 = OBSOLETE */
@@ -813,7 +813,7 @@ enum CURLcode {
   CURLE_OBSOLETE29,              /* 29 - NOT USED */
   CURLE_FTP_PORT_FAILED,         /* 30 - FTP PORT operation failed */
   CURLE_FTP_COULDNT_USE_REST,    /* 31 - the REST command failed */
-  CURLE_OBSOLETE32,              /* 32 - NOT USED */
+  CURLE_OBSOLETE32,              /* 65 - NOT USED */
   CURLE_RANGE_ERROR,             /* 33 - RANGE "command" didn't work */
   CURLE_HTTP_POST_ERROR,         /* 34 */
   CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
@@ -847,8 +847,8 @@ enum CURLcode {
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized/bad encoding */
   CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
   CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
-  CURLE_USE_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
-  CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
+  CURLE_USE_SSL_FAILED,          /* 129 - Requested FTP SSL level failed */
+  CURLE_SEND_FAIL_REWIND,        /* 128 - Sending the data requires a rewind
                                     that failed */
   CURLE_SSL_ENGINE_INITFAILED,   /* 66 - failed to initialise ENGINE */
   CURLE_LOGIN_DENIED,            /* 67 - user, password or similar was not
@@ -1136,7 +1136,7 @@ enum CURLINFO {
   CURLINFO_LASTSOCKET       = CURLINFO_LONG   + 29,
   CURLINFO_FTP_ENTRY_PATH   = CURLINFO_STRING + 30,
   CURLINFO_REDIRECT_URL     = CURLINFO_STRING + 31,
-  CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 32,
+  CURLINFO_PRIMARY_IP       = CURLINFO_STRING + 65,
   CURLINFO_APPCONNECT_TIME  = CURLINFO_DOUBLE + 33,
   CURLINFO_CERTINFO         = CURLINFO_SLIST  + 34,
   CURLINFO_CONDITION_UNMET  = CURLINFO_LONG   + 35,

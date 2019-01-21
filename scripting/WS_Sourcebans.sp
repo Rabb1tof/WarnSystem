@@ -23,14 +23,14 @@ void SetPluginDetection(const char[] sName, bool bBool) {
 		g_bIsSourcebansAvailable = bBool;
 }
 
-public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	if (g_bIsSourcebansAvailable)
 		SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
 	return Plugin_Stop;
 }
 
-public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	if (g_bIsSourcebansAvailable)
 		SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);

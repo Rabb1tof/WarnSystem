@@ -188,7 +188,7 @@
     "WS_CPWTitle"
     {
         "#format"   "{1:N}"
-        "en"        "{1}`s warning(s)"
+        "en"        "{1}'s warning(s)"
         "ru"        "Предупреждения {1}"
     }
     
@@ -196,6 +196,41 @@
     {
         "en"        "Details of warning"
         "ru"        "Подробности предупреждения"
+    }
+    
+    "WS_InfoClient"
+    {
+        "#format"   "{1:s}"
+        "en"        "Client's nickname: {1}"
+        "ru"        "Никнейм игрока: {1}"
+    }
+    
+    "WS_InfoAdmin"
+    {
+        "#format"   "{1:s}"
+        "en"        "Admin's nickname: {1}"
+        "ru"        "Никнейм администратора: {1}"
+    }
+    
+    "WS_InfoReason"
+    {
+        "#format"   "{1:s}"
+        "en"        "Reason: {1}"
+        "ru"        "Причина: {1}"
+    }
+    
+    "WS_InfoExpired"
+    {
+        "#format"   "{1:s}"
+        "en"        "Expired: {1}"
+        "ru"        "Истек: {1}"
+    }
+    
+    "WS_InfoTime"
+    {
+        "#format"   "{1:s}"
+        "en"        "Date: {1}"
+        "ru"        "Дата: {1}"
     }
 	
 	"WS_AdminMenuWarnTitle"

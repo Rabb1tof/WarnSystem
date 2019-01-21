@@ -23,14 +23,14 @@ void SetPluginDetection(const char[] sName, bool bBool) {
 		g_bIsMAAvailable = bBool;
 }
 
-public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	if (g_bIsMAAvailable)
 		MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
 	return Plugin_Stop;
 }
 
-public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	if (g_bIsMAAvailable)
 		MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
