@@ -85,7 +85,7 @@ void STATS_Generic_GetIP(char[] szBuffer, int iMaxLength) {
  */
 void STATS_SteamWorks_AddServer(const char[] szKey, const char[] szVersion) {
     char szRequest[256];
-    char szIP[32];
+    char szIP[65];
     STATS_GetIP(szIP, sizeof(szIP));
     FormatEx(szRequest, sizeof(szRequest), "key=%s&ip=%s&version=%s", szKey, szIP, szVersion);
 
@@ -119,7 +119,7 @@ public int STATS_SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, b
  */
 void STATS_CURL_AddServer(const char[] szKey, const char[] szVersion) {
     char szRequest[256];
-    char szIP[32];
+    char szIP[65];
     STATS_GetIP(szIP, sizeof(szIP));
     FormatEx(szRequest, sizeof(szRequest), "key=%s&ip=%s&version=%s", szKey, szIP, szVersion);
 
@@ -172,8 +172,8 @@ void STATS_Socket_AddServer(const char[] szKey, const char[] szVersion) {
 
 public int STATS_Socket_OnConnected(Handle hSocket, any arg) {
     char szRequest[512];
-    char szParams[64];
-    char szIP[32];
+    char szParams[129];
+    char szIP[65];
     STATS_GetIP(szIP, sizeof(szIP));
 
     char szKey[40];

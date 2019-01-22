@@ -3,31 +3,7 @@
 #endif
 
 #define _warnsystem_included
-#define APIVERSION "1.2"
-
-public SharedPlugin __pl_WarnSystem = {
-    name = "WarnSystem",
-    file = "WarnSystem.smx",
-#if defined REQUIRE_PLUGIN
-    required = 1,
-#else
-    required = 0,
-#endif
-};
-
-#if !defined REQUIRE_PLUGIN
-public void __pl_DynamicMOTD_SetNTVOptional() {
-    MarkNativeAsOptional("WarnSystem_Warn");
-    MarkNativeAsOptional("WarnSystem_UnWarn");
-    MarkNativeAsOptional("WarnSystem_ResetWarn");
-    MarkNativeAsOptional("WarnSystem_GetDatabase");
-    MarkNativeAsOptional("WarnSystem_GetPlayerWarns");
-	MarkNativeAsOptional("WarnSystem_GetMaxWarns");
-	MarkNativeAsOptional("WarnSystem_PrintToAdmins");
-}
-#endif
-
-#define APIVERSION "1.2dev2"
+#define APIVERSION "1.3"
 
 public SharedPlugin __pl_WarnSystem = {
     name = "WarnSystem",
@@ -59,7 +35,7 @@ public void __pl_DynamicMOTD_SetNTVOptional() {
  * @param sReason		The reason why you issue a warning on client
  * @noreturn		
  *********************************************************/
-native void WarnSystem_Warn(int iAdmin, int iClient, char sReason[64]);
+native void WarnSystem_Warn(int iAdmin, int iClient, char sReason[129]);
 
 /*********************************************************
  * Remove a warning on a player
@@ -69,7 +45,7 @@ native void WarnSystem_Warn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The reason why you remove the warning
  * @noreturn		
  *********************************************************/
-native void WarnSystem_UnWarn(int iAdmin, int iClient, char sReason[64]);
+native void WarnSystem_UnWarn(int iAdmin, int iClient, char sReason[129]);
 
 /*********************************************************
  * Reset a players warnings
@@ -79,7 +55,7 @@ native void WarnSystem_UnWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The reason why you reset the warnings
  * @noreturn		
  *********************************************************/
-native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
+native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[129]);
 
 /*********************************************************
  * Returns database handle
@@ -131,7 +107,7 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The reason why he warns
  * @noreturn	
  *********************************************************/
- forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[64]);
+ forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[129]);
  
  /*********************************************************
  * Calling then admin issues a unwarn
@@ -141,7 +117,7 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The reason why he un6warns
  * @noreturn	
  *********************************************************/
- forward void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[64]);
+ forward void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[129]);
  
  /*********************************************************
  * Calling then admin issues a warn reset
@@ -151,7 +127,7 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The reason why he reset warns
  * @noreturn	
  *********************************************************/
- forward void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[64]);
+ forward void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[129]);
  
  /*********************************************************
  * Calling on warn to punish player
@@ -161,7 +137,7 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The ban reason
  * @return Return Plugin_Stop or core will log error
  *********************************************************/
- forward Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64]);
+ forward Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129]);
  
  /*********************************************************
  * Calling on maxwarns to punish player
@@ -171,4 +147,4 @@ native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[64]);
  * @param sReason		The ban reason
  * @return Return Plugin_Stop or core will log error
  *********************************************************/
- forward Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64]);
+ forward Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129]);
