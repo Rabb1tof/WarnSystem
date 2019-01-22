@@ -23,11 +23,11 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	g_hGFwd_WarnPunishment = CreateGlobalForward("WarnSystem_WarnPunishment", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_WarnMaxPunishment = CreateGlobalForward("WarnSystem_WarnMaxPunishment", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	
-	RegPluginLibrary("warnsystem");
+	RegPluginLibrary("WarnSystem");
 	
 	g_bIsLateLoad = bLate;
 	
-	STATS_MarkNativesAsOptional();
+	//STATS_MarkNativesAsOptional();
 	
 	return APLRes_Success;
 }
@@ -36,7 +36,7 @@ public int Native_WarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iAdmin = GetNativeCell(1);
 	int iClient = GetNativeCell(2);
-	char sReason[64];
+	char sReason[129];
 	GetNativeString(3, sReason, sizeof(sReason));
 	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 		WarnPlayer(iAdmin, iClient, sReason);
@@ -48,7 +48,7 @@ public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iAdmin = GetNativeCell(1);
 	int iClient = GetNativeCell(2);
-	char sReason[64];
+	char sReason[129];
 	GetNativeString(3, sReason, sizeof(sReason));
 	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 		UnWarnPlayer(iAdmin, iClient, sReason);
@@ -60,7 +60,7 @@ public int Native_ResetWarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iAdmin = GetNativeCell(1);
 	int iClient = GetNativeCell(2);
-	char sReason[64];
+	char sReason[129];
 	GetNativeString(3, sReason, sizeof(sReason));
 	if (0<iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin<=MaxClients)
 		ResetPlayerWarns(iAdmin, iClient, sReason);
@@ -94,7 +94,7 @@ void WarnSystem_OnClientLoaded(int iClient)
 	Call_Finish();
 }
 
-void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[64])
+void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientWarn);
 	Call_PushCell(iAdmin);
@@ -103,7 +103,7 @@ void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[64])
 	Call_Finish();
 }
 
-void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[64])
+void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientUnWarn);
 	Call_PushCell(iAdmin);
@@ -112,7 +112,7 @@ void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[64])
 	Call_Finish();
 }
 
-void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[64])
+void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientResetWarns);
 	Call_PushCell(iAdmin);
@@ -121,7 +121,7 @@ void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[64])
 	Call_Finish();
 }
 
-Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, char sReason[64])
+Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientWarn_Pre);
@@ -132,7 +132,7 @@ Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, char sReason[64])
 	return act;
 }
 
-Action WarnSystem_OnClientUnWarnPre(int iAdmin, int iClient, char sReason[64])
+Action WarnSystem_OnClientUnWarnPre(int iAdmin, int iClient, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientUnWarn_Pre);
@@ -143,7 +143,7 @@ Action WarnSystem_OnClientUnWarnPre(int iAdmin, int iClient, char sReason[64])
 	return act;
 }
 
-Action WarnSystem_OnClientResetWarnsPre(int iAdmin, int iClient, char sReason[64])
+Action WarnSystem_OnClientResetWarnsPre(int iAdmin, int iClient, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientResetWarns_Pre);
@@ -154,7 +154,7 @@ Action WarnSystem_OnClientResetWarnsPre(int iAdmin, int iClient, char sReason[64
 	return act;
 }
 
-Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght,  char sReason[64])
+Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght,  char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_WarnPunishment);
@@ -166,7 +166,7 @@ Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght,  char 
 	return act;
 }
 
-Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[64])
+Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_WarnMaxPunishment);
