@@ -3,31 +3,7 @@
 #endif
 
 #define _warnsystem_included
-#define APIVERSION "1.2"
-
-public SharedPlugin __pl_WarnSystem = {
-    name = "WarnSystem",
-    file = "WarnSystem.smx",
-#if defined REQUIRE_PLUGIN
-    required = 1,
-#else
-    required = 0,
-#endif
-};
-
-#if !defined REQUIRE_PLUGIN
-public void __pl_DynamicMOTD_SetNTVOptional() {
-    MarkNativeAsOptional("WarnSystem_Warn");
-    MarkNativeAsOptional("WarnSystem_UnWarn");
-    MarkNativeAsOptional("WarnSystem_ResetWarn");
-    MarkNativeAsOptional("WarnSystem_GetDatabase");
-    MarkNativeAsOptional("WarnSystem_GetPlayerWarns");
-	MarkNativeAsOptional("WarnSystem_GetMaxWarns");
-	MarkNativeAsOptional("WarnSystem_PrintToAdmins");
-}
-#endif
-
-#define APIVERSION "1.2dev2"
+#define APIVERSION "1.3"
 
 public SharedPlugin __pl_WarnSystem = {
     name = "WarnSystem",

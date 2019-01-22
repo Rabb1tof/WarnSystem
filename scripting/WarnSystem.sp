@@ -20,7 +20,7 @@
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
-#tryinclude "WarnSystem/stats.sp"
+/*#tryinclude "WarnSystem/stats.sp"
 #ifdef __stats_included
 	#undef REQUIRE_PLUGIN
 	#undef REQUIRE_EXTENSIONS
@@ -34,7 +34,7 @@
 	#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
 	#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
 	#define PLUGIN_STATS_SCRIPT "add_server.php"
-#endif
+#endif */
 
 #pragma newdecls required
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
@@ -84,9 +84,9 @@ public void OnPluginStart()
 	InitializeDatabase();
 	InitializeCommands();
 	
-	#ifdef __stats_included
+	/*#ifdef __stats_included
 		InitializeStats();
-	#endif
+	#endif */
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -108,25 +108,25 @@ public void OnLibraryAdded(const char[] sName)
 	if (StrEqual(sName, "adminmenu"))
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
-	#ifdef __stats_included
+	/*#ifdef __stats_included
 		STATS_OnLibraryAdded(sName);
-	#endif
+	#endif*/
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
-	#ifdef __stats_included
+	/*#ifdef __stats_included
 		STATS_OnLibraryRemoved(sName);
-	#endif
+	#endif*/
 }
 
 public void OnMapStart()
 {
-	#ifdef __stats_included
+	/*#ifdef __stats_included
 		STATS_AddServer(APIKEY, PLUGIN_VERSION);
-	#endif
+	#endif*/
 	for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);
 	if(g_bWarnSound)

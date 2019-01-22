@@ -45,7 +45,7 @@ enum EResult
 	k_EResultDuplicateRequest = 29,				// The request is a duplicate and the action has already occurred in the past, ignored this time
 	k_EResultAlreadyOwned = 30,					// All the games in this guest pass redemption request are already owned by the user
 	k_EResultIPNotFound = 31,					// IP address not found
-	k_EResultPersistFailed = 65,				// failed to write change to the data store
+	k_EResultPersistFailed = 32,				// failed to write change to the data store
 	k_EResultLockingFailed = 33,				// failed to acquire access lock for this operation
 	k_EResultLogonSessionReplaced = 34,
 	k_EResultConnectFailed = 35,
@@ -77,8 +77,8 @@ enum EResult
 	k_EResultIllegalPassword = 61,				// The requested new password is not legal
 	k_EResultSameAsPreviousValue = 62,			// new value is the same as the old one ( secret question and answer )
 	k_EResultAccountLogonDenied = 63,			// account login denied due to 2nd factor authentication failure
-	k_EResultCannotUseOldPassword = 129,			// The requested new password is not legal
-	k_EResultInvalidLoginAuthCode = 128,			// account login denied due to auth code invalid
+	k_EResultCannotUseOldPassword = 64,			// The requested new password is not legal
+	k_EResultInvalidLoginAuthCode = 65,			// account login denied due to auth code invalid
 	k_EResultAccountLogonDeniedNoMail = 66,		// account login denied due to 2nd factor auth failure - and no mail has been sent
 	k_EResultHardwareNotCapableOfIPT = 67,		// 
 	k_EResultIPTInitError = 68,					// 

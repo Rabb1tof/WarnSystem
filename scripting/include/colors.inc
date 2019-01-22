@@ -614,8 +614,8 @@ stock CShowActivity(client, const String:format[], any:...)
 	new value = GetConVarInt(sm_show_activity);
 	new ReplySource:replyto = GetCmdReplySource();
 	
-	new String:name[128] = "Console";
-	new String:sign[128] = "ADMIN";
+	new String:name[MAX_NAME_LENGTH] = "Console";
+	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
 	new bool:display_in_chat = false;
 	if (client != 0)
 	{
@@ -671,7 +671,7 @@ stock CShowActivity(client, const String:format[], any:...)
 			/* Treat this as a normal user. */
 			if ((value & 1) | (value & 2))
 			{
-				new String:newsign[128];
+				new String:newsign[MAX_NAME_LENGTH];
 				newsign = sign;
 				if ((value & 2) || (i == client))
 				{
@@ -690,7 +690,7 @@ stock CShowActivity(client, const String:format[], any:...)
 				|| (value & 8)
 				|| ((value & 16) && is_root))
 			{
-				new String:newsign[128]
+				new String:newsign[MAX_NAME_LENGTH]
 				newsign = sign;
 				if ((value & 8) || ((value & 16) && is_root) || (i == client))
 				{
@@ -727,8 +727,8 @@ stock CShowActivityEx(client, const String:tag[], const String:format[], any:...
 	new value = GetConVarInt(sm_show_activity);
 	new ReplySource:replyto = GetCmdReplySource();
 	
-	new String:name[128] = "Console";
-	new String:sign[128] = "ADMIN";
+	new String:name[MAX_NAME_LENGTH] = "Console";
+	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
 	new bool:display_in_chat = false;
 	if (client != 0)
 	{
@@ -784,7 +784,7 @@ stock CShowActivityEx(client, const String:tag[], const String:format[], any:...
 			/* Treat this as a normal user. */
 			if ((value & 1) | (value & 2))
 			{
-				new String:newsign[128];
+				new String:newsign[MAX_NAME_LENGTH];
 				newsign = sign;
 				if ((value & 2) || (i == client))
 				{
@@ -803,7 +803,7 @@ stock CShowActivityEx(client, const String:tag[], const String:format[], any:...
 				|| (value & 8)
 				|| ((value & 16) && is_root))
 			{
-				new String:newsign[128];
+				new String:newsign[MAX_NAME_LENGTH];
 				newsign = sign;
 				if ((value & 8) || ((value & 16) && is_root) || (i == client))
 				{
@@ -842,8 +842,8 @@ stock CShowActivity2(client, const String:tag[], const String:format[], any:...)
 	new value = GetConVarInt(sm_show_activity);
 	new ReplySource:replyto = GetCmdReplySource();
 	
-	new String:name[128] = "Console";
-	new String:sign[128] = "ADMIN";
+	new String:name[MAX_NAME_LENGTH] = "Console";
+	new String:sign[MAX_NAME_LENGTH] = "ADMIN";
 	if (client != 0)
 	{
 		if (client < 0 || client > MaxClients || !IsClientConnected(client))
@@ -896,7 +896,7 @@ stock CShowActivity2(client, const String:tag[], const String:format[], any:...)
 			/* Treat this as a normal user. */
 			if ((value & 1) | (value & 2))
 			{
-				new String:newsign[128];
+				new String:newsign[MAX_NAME_LENGTH];
 				newsign = sign;
 				if ((value & 2))
 				{
@@ -915,7 +915,7 @@ stock CShowActivity2(client, const String:tag[], const String:format[], any:...)
 			|| (value & 8)
 			|| ((value & 16) && is_root))
 			{
-				new String:newsign[128];
+				new String:newsign[MAX_NAME_LENGTH];
 				newsign = sign;
 				if ((value & 8) || ((value & 16) && is_root))
 				{
