@@ -13,7 +13,7 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_WarnArguments");
 		return Plugin_Handled;
 	}
-	char sBuffer[128], sReason[64];
+	char sBuffer[128], sReason[129];
 	GetCmdArg(1, sBuffer, sizeof(sBuffer));
 	int iTarget = FindTarget(iClient, sBuffer, true, true);
 	if (!iTarget)
@@ -38,7 +38,7 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_UnWarnArguments");
 		return Plugin_Handled;
 	}
-	char sBuffer[128], sReason[64];
+	char sBuffer[128], sReason[129];
 	GetCmdArg(1, sBuffer, sizeof(sBuffer));
 	int iTarget = FindTarget(iClient, sBuffer, true, true);
 	if (!iTarget)
@@ -68,7 +68,7 @@ public Action Command_WarnReset(int iClient, int iArgs)
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_ResetWarnArguments");
 		return Plugin_Handled;
 	}
-	char sBuffer[128], sReason[64];
+	char sBuffer[128], sReason[129];
 	GetCmdArg(1, sBuffer, sizeof(sBuffer));
 	int iTarget = FindTarget(iClient, sBuffer, true, true);
 	if (!iTarget)
