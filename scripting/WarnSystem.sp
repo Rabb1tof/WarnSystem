@@ -1,4 +1,15 @@
+//---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
+
+#define PLUGIN_NAME         "WarnSystem"
+#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
+#define PLUGIN_VERSION      "1.3"
+#define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
+#define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
+
+#define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
+#define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
+
 #include <colors>
 #include <sdktools_sound>
 #include <sdktools_stringtables>
@@ -6,28 +17,26 @@
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
-//#tryinclude <SteamWorks>
-//#tryinclude <socket>
-//#tryinclude <cURL>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
+
+#tryinclude "WarnSystem/stats.sp"
+#ifdef __stats_included
+	#undef REQUIRE_PLUGIN
+	#undef REQUIRE_EXTENSIONS
+	#tryinclude <SteamWorks>
+	#tryinclude <socket>
+	#tryinclude <cURL>
+	#define REQUIRE_PLUGINS
+	#define REQUIRE_EXTENSIONS
+	
+	#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
+	#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
+	#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
+	#define PLUGIN_STATS_SCRIPT "add_server.php"
+#endif
+
 #pragma newdecls required
-
-//---------------------------------DEFINES--------------------------------
-#define PLUGIN_NAME         "WarnSystem"
-#define PLUGIN_AUTHOR       "vadrozh"
-#define PLUGIN_VERSION      "1.2.1"
-#define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
-#define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
-
-//#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
-//#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
-//#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
-//#define PLUGIN_STATS_SCRIPT "add_server.php"
-
-#define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
-#define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
-
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 //----------------------------------------------------------------------------
 
@@ -40,7 +49,6 @@ Database g_hDatabase;
 
 int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
 
-//#include "WarnSystem/stats.sp"
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -75,7 +83,10 @@ public void OnPluginStart()
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
-	//InitializeStats();
+	
+	#ifdef __stats_included
+		InitializeStats();
+	#endif
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -91,17 +102,31 @@ public void OnPluginStart()
 		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
 
-//public void OnLibraryAdded(const char[] sName){STATS_OnLibraryAdded(sName);}
+public void OnLibraryAdded(const char[] sName)
+{
+	Handle hAdminMenu;
+	if (StrEqual(sName, "adminmenu"))
+		if ((hAdminMenu = GetAdminTopMenu()))
+			InitializeMenu(hAdminMenu);
+	#ifdef __stats_included
+		STATS_OnLibraryAdded(sName);
+	#endif
+}
+
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
-	//STATS_OnLibraryRemoved(sName);
+	#ifdef __stats_included
+		STATS_OnLibraryRemoved(sName);
+	#endif
 }
 
 public void OnMapStart()
 {
-	//STATS_AddServer(APIKEY, PLUGIN_VERSION);
+	#ifdef __stats_included
+		STATS_AddServer(APIKEY, PLUGIN_VERSION);
+	#endif
 	for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);
 	if(g_bWarnSound)
