@@ -8,7 +8,7 @@ char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id
 	g_sSQL_WarnPlayer[] = "INSERT INTO `WarnSystem` (`serverid`, `client`, `clientid`, `admin`, `adminid`, `reason`, `time`) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
 	g_sSQL_DeleteWarns[] = "DELETE FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
 	g_sSQL_SetExpired[] = "UPDATE `WarnSystem` SET `expired` = '1' WHERE `clientid` = '%i' AND `serverid` = '%i';",
-	g_sSQL_SelectWarns[] = "SELECT `id` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i' AND `expired` = '0' ORDER BY `id` DESC LIMIT 1;",
+	g_sSQL_SelectWarns[] = "SELECT `id` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i' AND `expired` = '0'",
 	g_sSQL_UnwarnPlayer[] = "DELETE FROM `WarnSystem` WHERE `id` = '%i' AND `serverid` = '%i';",
 	g_sSQL_CheckPlayerWarns[] = "SELECT `id`,`admin`, `time` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
 	g_sSQL_GetInfoWarn[] = "SELECT `client`, `admin`, `reason`, `time`, `expired` FROM `WarnSystem` WHERE `id` = '%i'",
@@ -127,8 +127,10 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 		LogWarnings("[WarnSystem] SQL_LoadDataPlayer - error while working with data (%s)", sError);
 		return;
 	}
+    
+    //while (hDatabaseResults.FetchRow())
 	
-	if (hDatabaseResults.HasResults)
+	else if (hDatabaseResults.HasResults)
 	{
 		g_iWarnings[iClient] = hDatabaseResults.RowCount;
 		if (g_bPrintToAdmins && !g_bIsLateLoad)
