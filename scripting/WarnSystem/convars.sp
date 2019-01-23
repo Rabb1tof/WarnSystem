@@ -21,7 +21,7 @@ public void InitializeConVars()
 	(g_hCvarPrintToChat = CreateConVar("sm_warns_printtochat", "1", "Print to all, then somebody warned/unwarned: 0 - print only to admins, 1 - print to all", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToChat);
 	(g_hCvarLogWarnings = CreateConVar("sm_warns_enablelogs", "1", "Log errors and warns: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_LogWarnings);
 	
-	AutoExecConfig(true, "Core", "warnsystem");
+	AutoExecConfig(true, "core", "warnsystem");
 }
 
 public void OnConfigsExecuted()
