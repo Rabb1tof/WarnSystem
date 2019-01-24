@@ -47,7 +47,7 @@ bool g_bIsFuckingGame;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
+int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1];
 
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
@@ -253,4 +253,12 @@ public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient, iAdmin, szReason);
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+}
+
+stock bool IsValidClient(int iClient)
+{
+   if(iClient <= 0)     return false;
+   if(iClient > MaxClients)     return false;
+   if(!IsClientConnected(iClient))      return false;
+   return IsClientInGame(iClient);
 }

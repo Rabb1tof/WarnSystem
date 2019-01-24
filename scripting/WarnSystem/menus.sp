@@ -360,32 +360,35 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 
 void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 {
-	int iAdmin, iClient;
+    int iAdmin, iClient;
+    
+    if(hCheckData)
+    {
+        iAdmin = GetClientOfUserId(ReadPackCell(hCheckData));
+        iClient = GetClientOfUserId(ReadPackCell(hCheckData));
+        g_iUserID[iAdmin] = GetClientUserId(iClient);
+        CloseHandle(hCheckData); 
+    } else return;
 	
-	if(hCheckData)
-	{
-		iAdmin = GetClientOfUserId(ReadPackCell(hCheckData));
-		iClient = GetClientOfUserId(ReadPackCell(hCheckData));
-		CloseHandle(hCheckData); 
-	} else return;
-	
-	if (!hDatabaseResults.RowCount)
-	{
+    if (!hDatabaseResults.RowCount)
+    {
 		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 		return;
-	}
-	
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
-	
-	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
-	int iDate, iID;
-	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
-	hMenu.SetTitle("%T:\n", "WS_CPWTitle", iAdmin, iClient);
-	//Ya, nice output *NOW TO MENU, BITCHES*!
-	
-	while (hDatabaseResults.FetchRow())
-	{
+    }
+    
+    if(!IsValidClient(iAdmin))      return;
+    
+    //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
+    //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
+    
+    char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
+    int iDate, iID;
+    Menu hMenu = new Menu(CheckPlayerWarnsMenu);
+    hMenu.SetTitle("%T:\n", "WS_CPWTitle", iAdmin, iClient);
+    //Ya, nice output *NOW TO MENU, BITCHES*!
+    
+    while (hDatabaseResults.FetchRow())
+    {
         iID = hDatabaseResults.FetchInt(0);
         IntToString(iID, szID, sizeof(szID));
         SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
@@ -395,9 +398,9 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
         FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
         FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
         hMenu.AddItem(szID, szBuffer);
-	}
-	hMenu.ExitBackButton = true;
-	hMenu.Display(iAdmin, MENU_TIME_FOREVER);
+    }
+    hMenu.ExitBackButton = true;
+    hMenu.Display(iAdmin, MENU_TIME_FOREVER);
 }
 
 public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int iItem)
@@ -426,8 +429,10 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
 void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 {
     if(!hDatabaseResults.FetchRow())     return;
+    if(!IsValidClient(iAdmin))      return;
     char szClient[129], szAdmin[129], szReason[129], szTimeFormat[65], szBuffer[80];
     int iDate, iExpired;
+    
     
     Menu hMenu = new Menu(GetInfoWarnMenu_CallBack);
     hMenu.SetTitle("%T:\n", "WS_InfoWarn", iAdmin);
@@ -454,8 +459,10 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     hMenu.Display(iAdmin, MENU_TIME_FOREVER);
 }
 
-public int GetInfoWarnMenu_CallBack(Menu hMenu, MenuAction action, int param1, int iItem)
+public int GetInfoWarnMenu_CallBack(Menu hMenu, MenuAction action, int iAdmin, int iItem)
 {
-    if(action == MenuAction_End)
-            CloseHandle(hMenu);
+    switch(action){
+        case MenuAction_End:    CloseHandle(hMenu);
+        case MenuAction_Cancel: if((iItem == MenuCancel_ExitBack) && IsValidClient(iAdmin))    CheckPlayerWarns(iAdmin, GetClientOfUserId(g_iUserID[iAdmin]));
+    }
 }
