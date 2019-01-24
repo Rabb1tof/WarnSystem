@@ -255,10 +255,4 @@ public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }
 
-stock bool IsValidClient(int iClient)
-{
-   if(iClient <= 0)     return false;
-   if(iClient > MaxClients)     return false;
-   if(!IsClientConnected(iClient))      return false;
-   return IsClientInGame(iClient);
-}
+stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient)); }

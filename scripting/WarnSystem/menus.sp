@@ -463,6 +463,6 @@ public int GetInfoWarnMenu_CallBack(Menu hMenu, MenuAction action, int iAdmin, i
 {
     switch(action){
         case MenuAction_End:    CloseHandle(hMenu);
-        case MenuAction_Cancel: if((iItem == MenuCancel_ExitBack) && IsValidClient(iAdmin))    CheckPlayerWarns(iAdmin, GetClientOfUserId(g_iUserID[iAdmin]));
+        case MenuAction_Cancel: if(iItem == MenuCancel_ExitBack)    CheckPlayerWarns(iAdmin, GetClientOfUserId(g_iUserID[iAdmin]));
     }
 }
