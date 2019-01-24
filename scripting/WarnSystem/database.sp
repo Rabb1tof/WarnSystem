@@ -110,7 +110,7 @@ public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, co
 
 public void LoadPlayerData(int iClient)
 {
-	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient) && g_hDatabase)
+	if(IsValidClient(iClient) && g_hDatabase)
 	{
 		char dbQuery[257];
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
@@ -145,7 +145,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
-	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		if (iAdmin == iClient)
 		{
@@ -206,7 +206,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
-	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		if (iAdmin == iClient)
 		{
@@ -278,7 +278,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 {
-	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
 		if (iAdmin == iClient)
 		{
@@ -348,7 +348,7 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
-	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
 	{
 		char dbQuery[257];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
@@ -359,7 +359,7 @@ public void CheckPlayerWarns(int iAdmin, int iClient)
 		ResetPack(hCheckData);
 		
 		g_hDatabase.Query(SQL_CheckPlayerWarns, dbQuery, hCheckData);
-		//mb print only count of warns?
+		//mb print only count of warns? Hm...no.
 	}
 }
 

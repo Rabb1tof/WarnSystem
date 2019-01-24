@@ -427,8 +427,9 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
             //LogMessage("Fetch warn: %s", szdbQuery);
             g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
         } 
-        case MenuAction_End:
-            CloseHandle(hMenu);
+        case MenuAction_End:    CloseHandle(hMenu);
+        case MenuAction_Cancel: if(iItem == MenuCancel_ExitBack)    DisplaySomeoneTargetMenu(param1, MenuHandler_CheckWarn);
+            
             
     }
 }
