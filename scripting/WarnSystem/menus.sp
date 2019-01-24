@@ -198,7 +198,7 @@ public void DisplayWarnReasons(int iClient)
 {
 	char sReason[129];
 	
-	Menu hMenu = new Menu(MenuHandler_PreformWarn, MenuAction_Select|MenuAction_Cancel|MenuAction_End);
+	Menu hMenu = new Menu(MenuHandler_PreformWarn);
 	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
@@ -208,8 +208,11 @@ public void DisplayWarnReasons(int iClient)
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/WarnReasons.cfg)");
 		return;
 	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason)))
-		AddMenuItem(hMenu, sReason, sReason);
+	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
+        TrimString(sReason);
+        if (sReason[0])
+            AddMenuItem(hMenu, NULL_STRING, sReason);
+    }
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -219,7 +222,7 @@ public void DisplayUnWarnReasons(int iClient)
 {
 	char sReason[129];
 	
-	Menu hMenu = new Menu(MenuHandler_PreformUnWarn, MenuAction_Select|MenuAction_Cancel|MenuAction_End);
+	Menu hMenu = new Menu(MenuHandler_PreformUnWarn);
 	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
@@ -229,8 +232,11 @@ public void DisplayUnWarnReasons(int iClient)
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/UnwarnReasons.cfg)");
 		return;
 	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason)))
-		AddMenuItem(hMenu, sReason, sReason);
+	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
+        TrimString(sReason);
+        if (sReason[0])
+            AddMenuItem(hMenu, NULL_STRING, sReason);
+    }
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -240,7 +246,7 @@ public void DisplayResetWarnReasons(int iClient)
 {
 	char sReason[129];
 	
-	Menu hMenu = new Menu(MenuHandler_PreformResetWarn, MenuAction_Select|MenuAction_Cancel|MenuAction_End);
+	Menu hMenu = new Menu(MenuHandler_PreformResetWarn);
 	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
@@ -250,8 +256,11 @@ public void DisplayResetWarnReasons(int iClient)
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/ResetWarnReasons.cfg)");
 		return;
 	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason)))
-		AddMenuItem(hMenu, sReason, sReason);
+	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
+        TrimString(sReason);
+        if (sReason[0])
+            AddMenuItem(hMenu, NULL_STRING, sReason);
+    }
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
