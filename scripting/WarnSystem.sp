@@ -14,6 +14,7 @@
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
+#include <dbi>
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>

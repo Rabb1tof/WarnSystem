@@ -20,7 +20,7 @@ public void InitializeConVars()
 	(g_hCvarPrintToAdmins = CreateConVar("sm_warns_printtoadmins", "1", "Print previous warnings on client connect to admins: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToAdmins);
 	(g_hCvarPrintToChat = CreateConVar("sm_warns_printtochat", "1", "Print to all, then somebody warned/unwarned: 0 - print only to admins, 1 - print to all", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToChat);
 	(g_hCvarLogWarnings = CreateConVar("sm_warns_enablelogs", "1", "Log errors and warns: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_LogWarnings);
-    (g_hCvarDeleteExpired = CreateConVar("sm_warns_delete_expired", "1", "Delete expired warnings of DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0))AddChangeHook(ChangeCvar_DeleteExpired);
+    (g_hCvarDeleteExpired = CreateConVar("sm_warns_delete_expired", "1", "Delete expired warnings of DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_DeleteExpired);
 	
 	AutoExecConfig(true, "core", "warnsystem");
 }
