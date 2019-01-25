@@ -10,8 +10,8 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sSQL_WarnPlayer[] = "INSERT INTO `ws_warn` (`server_id`, `client_id`, `admin_id`, `reason`, `time`, `expires_at`) VALUES ('%i', '%i', '%i', '%s', '%i', '%i');",
 	g_sSQL_DeleteWarns[] = "DELETE FROM `ws_warn` WHERE `client_id` = '%i';",
 	g_sSQL_DeleteExpired[] = "DELETE FROM `ws_warn` WHERE `expires_at` < UNIX_TIMESTAMP ;",
-	g_sSQL_SelectWarns[] = "SELECT `ws_warn`.`warn_id` FROM `ws_warn` INNER JOIN `ws_player` ON `ws_player`.`client_id` = '%i' AND `expires_at` = '0';",
-	g_sSQL_UnwarnPlayer[] = "DELETE FROM `ws_warn` WHERE `client_id` = '%i';",
+	g_sSQL_SelectWarns[] = "SELECT `ws_warn`.`warn_id` FROM `ws_warn` INNER JOIN `ws_player` ON `ws_player`.`client_id` = '%i' INNER JOIN `ws_server` ON `ws_server`.`server_id` = '%i' AND `expires_at` = '0';",
+	g_sSQL_UnwarnPlayer[] = "DELETE FROM `ws_warn` WHERE `warn_id` = '%i';",
 	g_sSQL_CheckPlayerWarns[] = "SELECT `ws_warn`.`warn_id`, `player`.`account_id` client_id, `admin`.`account_id` admin_name, `ws_warn`.`created_at` FROM `ws_warn` INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id`",
 	g_sSQL_GetInfoWarn[] = "SELECT `ws_warn`.`warn_id`, `admin`.`account_id` admin_id, `admin`.`username` admin_name, `player`.`account_id` client_id, `player`.`username` client_name, `ws_warn`.`reason` `ws_warn`.`expires_at` FROM `ws_warn` INNER JOIN `ws_player` AS admin  ON `ws_warn`.`admin_id` = `admin`.`account_id` INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id`;",
 	g_sClientIP[MAXPLAYERS+1][65],
@@ -259,7 +259,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		iID = hDatabaseResults.FetchInt(0);
 		
 		--g_iWarnings[iClient];
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID);
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
 		if (g_bPrintToChat)
