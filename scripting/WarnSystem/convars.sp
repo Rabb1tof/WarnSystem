@@ -1,7 +1,7 @@
 ConVar g_hCvarMaxWarns, g_hCvarMaxPunishment, g_hCvarBanLength, g_hCvarPunishment, g_hCvarSlapDamage, g_hCvarPrintToAdmins,
-		g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings, g_hCvarPrintToChat;
+		g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings, g_hCvarPrintToChat, g_hCvarDeleteExpired;
 
-bool g_bResetWarnings, g_bWarnSound, g_bPrintToAdmins, g_bLogWarnings, g_bPrintToChat;
+bool g_bResetWarnings, g_bWarnSound, g_bPrintToAdmins, g_bLogWarnings, g_bPrintToChat, g_bDeleteExpired;
 int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iSlapDamage;
 char g_sWarnSoundPath[PLATFORM_MAX_PATH];
 
@@ -20,6 +20,7 @@ public void InitializeConVars()
 	(g_hCvarPrintToAdmins = CreateConVar("sm_warns_printtoadmins", "1", "Print previous warnings on client connect to admins: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToAdmins);
 	(g_hCvarPrintToChat = CreateConVar("sm_warns_printtochat", "1", "Print to all, then somebody warned/unwarned: 0 - print only to admins, 1 - print to all", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_PrintToChat);
 	(g_hCvarLogWarnings = CreateConVar("sm_warns_enablelogs", "1", "Log errors and warns: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_LogWarnings);
+    (g_hCvarDeleteExpired = CreateConVar("sm_warns_delete_expired", "1", "Delete expired warnings of DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0))AddChangeHook(ChangeCvar_DeleteExpired);
 	
 	AutoExecConfig(true, "core", "warnsystem");
 }
@@ -39,6 +40,7 @@ public void OnConfigsExecuted()
 	g_bPrintToAdmins = g_hCvarPrintToAdmins.BoolValue;
 	g_bPrintToChat = g_hCvarPrintToChat.BoolValue;
 	g_bLogWarnings = g_hCvarLogWarnings.BoolValue;
+    g_bDeleteExpired = g_hCvarDeleteExpired.BoolValue;
 }
 
 public void ChangeCvar_ResetWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bResetWarnings = convar.BoolValue;}
@@ -52,3 +54,4 @@ public void ChangeCvar_WarnSoundPath(ConVar convar, const char[] oldValue, const
 public void ChangeCvar_PrintToAdmins(ConVar convar, const char[] oldValue, const char[] newValue){g_bPrintToAdmins = convar.BoolValue;}
 public void ChangeCvar_PrintToChat(ConVar convar, const char[] oldValue, const char[] newValue){g_bPrintToChat = convar.BoolValue;}
 public void ChangeCvar_LogWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bLogWarnings = convar.BoolValue;}
+public void ChangeCvar_DeleteExpired(ConVar convar, const char[] oldValue, const char[] newValue){g_bDeleteExpired = convar.BoolValue;}

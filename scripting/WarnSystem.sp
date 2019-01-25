@@ -145,6 +145,8 @@ public void OnMapStart()
 				PrecacheSound(g_sWarnSoundPath, true);
 		}
 	}
+    if(g_bDeleteExpired)
+        CheckExpiredWarns();
 }
 
 public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}

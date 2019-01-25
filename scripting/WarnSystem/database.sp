@@ -1,17 +1,59 @@
 int g_iServerID = 0;
 
-char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `serverid` INTEGER(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` INTEGER(32) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` INTEGER(32) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` INTEGER(32) NOT NULL default 0, `expired` INTEGER(1) NOT NULL default 0);",
-	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` int(12) NOT NULL AUTO_INCREMENT, `serverid` int(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` int(64) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` int(64) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` int(12) NOT NULL default 0, `expired` int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
-	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS `WarnSystem_Servers` (`sid` int(12) NOT NULL AUTO_INCREMENT, `address` VARCHAR(64) NOT NULL default '', PRIMARY KEY (sid)) CHARSET=utf8 COLLATE utf8_general_ci;",
-	g_sSQL_GetServerID[] = "SELECT `sid` FROM `WarnSystem_Servers` WHERE `address` = '%s';",
-	g_sSQL_SetServerID[] = "INSERT INTO `WarnSystem_Servers` (`address`) VALUES ('%s');",
-	g_sSQL_WarnPlayer[] = "INSERT INTO `WarnSystem` (`serverid`, `client`, `clientid`, `admin`, `adminid`, `reason`, `time`) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
-	g_sSQL_DeleteWarns[] = "DELETE FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
-	g_sSQL_SetExpired[] = "UPDATE `WarnSystem` SET `expired` = '1' WHERE `clientid` = '%i' AND `serverid` = '%i';",
-	g_sSQL_SelectWarns[] = "SELECT `id` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i' AND `expired` = '0'",
-	g_sSQL_UnwarnPlayer[] = "DELETE FROM `WarnSystem` WHERE `id` = '%i' AND `serverid` = '%i';",
-	g_sSQL_CheckPlayerWarns[] = "SELECT `id`,`admin`, `time` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
-	g_sSQL_GetInfoWarn[] = "SELECT `client`, `admin`, `reason`, `time`, `expired` FROM `WarnSystem` WHERE `id` = '%i'",
+char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player` (`account_id` int(12) NOT NULL AUTO_INCREMENT COMMENT 'Steam AccountID', `username` VARCHAR(128) NOT NULL default '', `warns` INTEGER(10) unsigned NOT NULL DEFAULT '0', PRIMARY KEY (account_id)) COMMENT = 'Перечень всех игроков';",
+	g_sSQL_CreateTablePlayers_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_player` (`account_id` int(12) NOT NULL AUTO_INCREMENT COMMENT 'Steam AccountID', `username` VARCHAR(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL default '', `warns` INTEGER(10) unsigned NOT NULL DEFAULT '0', PRIMARY KEY (account_id)) CHARSET=utf8 COLLATE utf8_general_ci COMMENT = 'Перечень всех игроков';",
+    g_sSQL_CreateTableWarns_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_warn` (
+  `warn_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор предупреждения',
+  `admin_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока-администратора, выдавшего предупреждение',
+  `client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',
+  `server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',
+  `reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',
+  `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',
+  `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',
+  PRIMARY KEY (`warn_id`),
+  KEY `FK_ws_warn_ws_server` (`server_id`),
+  KEY `FK_ws_warn_ws_admin` (`admin_id`),
+  KEY `FK_ws_warn_ws_client` (`client_id`),
+  CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ws_warn_ws_server` FOREIGN KEY (`server_id`) REFERENCES `ws_server` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Все выданные когда-либо предупреждения';"
+    g_sSQL_CreateTableWarns_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_warn` (
+  `warn_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор предупреждения',
+  `admin_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока-администратора, выдавшего предупреждение',
+  `client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',
+  `server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',
+  `reason` varchar(256) NOT NULL COMMENT 'Причина',
+  `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',
+  `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',
+  PRIMARY KEY (`warn_id`),
+  KEY `FK_ws_warn_ws_server` (`server_id`),
+  KEY `FK_ws_warn_ws_admin` (`admin_id`),
+  KEY `FK_ws_warn_ws_client` (`client_id`),
+  CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_ws_warn_ws_server` FOREIGN KEY (`server_id`) REFERENCES `ws_server` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) COMMENT='Все выданные когда-либо предупреждения';"
+	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS `ws_server` (`server_id` int(12) NOT NULL AUTO_INCREMENT, `address` VARCHAR(32) NOT NULL default '', `port` INTEGER(5) NOT NULL default '', PRIMARY KEY (server_id) UNIQUE KEY `ws_servers_address_port` (`address`,`port`)) CHARSET=utf8 COLLATE utf8_general_ci;",
+	g_sSQL_GetServerID[] = "SELECT `server_id` FROM `ws_server` WHERE `address` = '%s' AND `port` = '%s';",
+	g_sSQL_SetServerID[] = "INSERT INTO `ws_server` (`address`, `port`) VALUES ('%s', '%i');",
+	g_sSQL_WarnPlayer[] = "INSERT INTO `ws_warn` (`server_id`, `client_id`, `admin_id`, `reason`, `time`, `expires_at`) VALUES ('%i', '%i', '%i', '%s', '%i', '%i');",
+	g_sSQL_DeleteWarns[] = "DELETE FROM `ws_warn` WHERE `client_id` = '%i';",
+	g_sSQL_DeleteExpired[] = "DELETE FROM `ws_warn` WHERE `expires_at` < UNIX_TIMESTAMP ;",
+	g_sSQL_SelectWarns[] = "SELECT `ws_warn`.`warn_id` FROM `ws_warn` INNER JOIN `ws_player` ON `ws_player`.`client_id` = '%i' AND `expires_at` = '0';",
+	g_sSQL_UnwarnPlayer[] = "DELETE FROM `ws_warn` WHERE `client_id` = '%i';",
+	g_sSQL_CheckPlayerWarns[] = "SELECT `ws_warn`.`warn_id`, `player`.`account_id` client_id, `admin`.`account_id` admin_name, `ws_warn`.`created_at` FROM `ws_warn` INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id`",
+	g_sSQL_GetInfoWarn[] = "SELECT
+  `ws_warn`.`warn_id`,
+  `admin`.`account_id` admin_id,
+  `admin`.`username` admin_name,
+  `player`.`account_id` client_id,
+  `player`.`username` client_name,
+  `ws_warn`.`reason`
+  `ws_warn`.`expires_at`
+FROM `ws_warn`
+        INNER JOIN `ws_player` AS admin  ON `ws_warn`.`admin_id` = `admin`.`account_id`
+        INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id`;",
 	g_sClientIP[MAXPLAYERS+1][65],
 	g_sAddress[24];
 	
@@ -37,7 +79,8 @@ public void InitializeDatabase()
 	{
         //g_hDatabase.SetCharset("utf8");
         SQL_LockDatabase(g_hDatabase);
-        g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
+        g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTablePlayers_SQLite);
+        g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTableWarns_SQLite);
         SQL_UnlockDatabase(g_hDatabase);
 	} else
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
@@ -47,7 +90,8 @@ public void InitializeDatabase()
 			
 			g_hDatabase.SetCharset("utf8");
 			SQL_LockDatabase(g_hDatabase);
-			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
+			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTablePlayers_MySQL);
+            g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTableWarns_MySQL);
 			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
 			SQL_UnlockDatabase(g_hDatabase);
 		} else
@@ -191,12 +235,12 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 		//We don't need to fuck db because we cached warns.
 		if (g_iWarnings[iClient] >= g_iMaxWarns)
 		{
-			if(g_bResetWarnings)
+            if(g_bResetWarnings)
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
-				else
-				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
-			g_hDatabase.Query(SQL_CheckError, dbQuery);
-			PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
+			else
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteExpired, g_iAccountID[iClient], g_iServerID);
+            g_hDatabase.Query(SQL_CheckError, dbQuery);
+            PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
 		} else
 			PunishPlayer(iAdmin, iClient, sReason);
 	}
@@ -301,6 +345,24 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 		g_hDatabase.Query(SQL_ResetWarnPlayer, dbQuery, hResetWarnData);
 	}
 	
+}
+
+//------------------------------------Check for expired warnings------------------------------------------------
+
+void CheckExpiredWarns()
+{
+    char dbQuery[257];
+    FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteExpired);
+    g_hDatabase.Query(SQL_CheckExpiredWarns, dbQuery);
+}
+
+public void SQL_CheckExpiredWarns(Database hDatabase, DBResultSet hDatabaseResults, const char[] szError, Handle hResetWarnData)
+{
+    if (sError[0])
+	{
+		LogWarnings("[WarnSystem] SQL_CheckExpiredWarns - error while working with data (%s)", sError);
+		return;
+	}
 }
 
 public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hResetWarnData)
