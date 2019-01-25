@@ -223,7 +223,7 @@
     {
         "#format"   "{1:s}"
         "en"        "Expired: {1}"
-        "ru"        "Истек: {1}"
+        "ru"        "Истечет: {1}"
     }
     
     "WS_InfoTime"
