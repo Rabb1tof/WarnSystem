@@ -9,7 +9,7 @@ ConVar g_cSbType;
 
 public Plugin myinfo =
 {
-    name = "[WarnSystem] Sourcebans support (all version)",
+    name = "[WS] Sourcebans Support",
     author = "vadrozh, Rabb1t",
     description = "Module adds support of sb (all)",
     version = "1.1",
