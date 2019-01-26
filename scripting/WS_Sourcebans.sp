@@ -40,26 +40,26 @@ public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName);}
 public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName);}
 
 void SetPluginDetection(const char[] sName) {
-	if (!StrEqual(sName, "sourcebans") || !StrEqual(sName, "materialadmin"))
+    if (!StrEqual(sName, "sourcebans") || !StrEqual(sName, "materialadmin"))
         SetFailState("Can't find MaterialAdmin or SourceBans++ or SourceBans(Old).");
 }
 
 public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
-	switch(g_iSbType){
+    switch(g_iSbType){
         case 1:     MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
         case 2:     SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
         case 3:     SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
     }
-	return Plugin_Handled;
+    return Plugin_Handled;
 }
 
 public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
-	switch(g_iSbType){
+    switch(g_iSbType){
         case 1:     MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
         case 2:     SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
         case 3:     SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
     }
-	return Plugin_Handled;
+    return Plugin_Handled;
 }

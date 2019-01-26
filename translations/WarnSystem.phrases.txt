@@ -1,189 +1,189 @@
 "Phrases"
 {
-	"WS_Prefix"
-	{
-		"en"		"[WarnSystem]"
-	}
-	
-	"WS_ColoredPrefix"
-	{
-		"en"		"{lightgreen}[WarnSystem]{default}"
-	}
-	
-	//---------------------------------WarnSystem.sp----------------------------
-	
-	"WS_MaxKick"
-	{
-		"en"		"You have been kicked for reaching maximum warnings"
-		"ru"		"Вы кикнуты за макс. кол-во предупреждений"
-		"fr"		"Tu as ete kicke apres avoir ete suffisamment averti"
-		"de"		"Du wurdest gekickt wegen Ueberschreitung der Maximalgrenze von Warnungen"
-		"sv"		"Du har blivit utslängd för ha nått max antal varningar"
-		"nl"		"Je bent gekickt omdat je teveel waarschuwingen hebt"
-	}
-	
-	"WS_MaxBan"
-	{
-		"en"		"You have been banned for reaching maximum warnings"
-		"en"		"Вы забанены за макс. кол-во предупреждений"
-		"fr"		"Tu as ete banni apres avoir ete suffisamment averti"
-		"de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von Warnungen"
-		"sv"		"Du har blivit bannlyst för ha nått max antal varningar"
-		"nl"		"Je bent verbannen voor teveel waarschuwingen hebben"
-	}
-	
-	"WS_Message"
-	{
-		"en"		"{lightred}You have been issued a warning. Follow the rules or further actions will be taken."
-		"ru"		"{lightred}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
-		"fr"		"{lightred}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
-		"de"		"{lightred}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
-		"sv"		"{lightred}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
-		"nl"		"{lightred}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
-	}
-	
-	"WS_PunishKick"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have been kicked for receiving a warning (Reason:{1})"
-		"en"		"Вы кикнуты за предупреждение (Причина:{1})"
-		"fr"        "Tu as ete kicke en guise d'avertissement (Motif: {1})"
-		"de"		"Du wurdest gekickt, weil Du eine Warnung erhalten hast"
-		"sv"		"Du har blivit utslängd för att ha mottagit en varning (Anledning: {1})"
-		"nl"		"Je bent gekickt vanwege een waarschuwing (Reden: {1})"
-	}
-	
-	"WS_PunishBan"
-	{
-		"#format"	"{1:s}"
-		"en"		"You received a warning (Reason: {1})"
-		"ru"		"Вы забанены за предупреждение (Причина: {1})"
-		"fr"        "Tu viens de recevoir un avertissement (Motif: {1})"
-		"de"		"Du wurdest gewarnt"
-		"sv"		"Du blev varnad (Anledning: {1})"
-		"nl"		"Je ontvangt een waarschuwing (Reden: {1})"
-	}
-	
-	//---------------------------------database.sp---------------------------------
-	
-	"WS_PlayerWarns"
-	{
-		"#format"	"{1:N},{2:i}"
-		"en"		"{blue}{1} has connected with ({2}) Prior Warnings."
-		"ru"		"{blue}{1} подключился. У него ({2}) активных предупреждений."
-		"fr"		"{blue}{1} connecte avec {2} avertissement(s) en memoire"
-		"de"		"{blue}{1} hat sich mit {2} vergangenen Warnungen verbunden"
-		"sv"		"{blue}{1} anslöt med {2} föregående varning(ar)"
-		"nl"		"{blue}{1} verbond met {2} vorige waarschuwing(en)"
-	}
-	
-	"WS_WarnPlayer"
-	{
-		"#format"	"{1:N},{2:N},{3:s}"
-		"en"		"{olive}{1} issued a warning on {2} with reason: {3}"
-		"ru"		"{olive}{1} выдал предупреждение {2}. Причина: {3}"
-		"fr"		"{olive}{1} a donne un avertissement a {2} pour motif: {3}"
-		"de"		"{olive}{1} {2} wurde mit gewarnt mit dem Grund: {3}"
-		"sv"		"{olive}{1} utfärdade en varning på {2} med anledningen: {3}"
-		"nl"		"{olive}{1} heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
-	}
-	
-	"WS_WarnPlayerPersonal"
-	{
-		"#format"	"{1:N},{2:s}"
-		"en"		"{olive}{1} issued a warning to you with reason: {2}"
-		"ru"		"{olive}{1} выдал вам предупреждение. Причина: {2}"
-		"fr"		"{olive}{1} a donne un avertissement pour motif: {2}"
-		"de"		"{olive}{1} wurde mit gewarnt mit dem Grund: {2}"
-		"sv"		"{olive}{1} utfärdade en varning på med anledningen: {2}"
-		"nl"		"{olive}{1} heeft een waarschuwing aan gegegeven met de reden: {2}"
-	}
-	
-	"WS_CantTargetYourself"
-	{
-		"en"		"{lightred}Can't target yourself."
-		"ru"		"{lightred}Нельзя выбрать самого себя."
-	}
-	
-	"WS_UnWarnPlayer"
-	{
-		"#format"	"{1:N},{2:N},{3:s}"
-		"en"		"{olive}{1} removed a warning on {2} with reason: {3}"
-		"ru"		"{olive}{1} снял предупреждение у игрока {2}. Причина: {3}"
-		"fr"        "{olive}{1} a supprime un avertissement de {2} pour motif: {3}"
-		"de"		"{olive}{1} Warnung von Spieler {2} zurückgenommen. Grund: {3}"
-		"sv"		"{olive}{1} tog bort en varning på {2} med anledningen: {3}"
-		"nl"		"{olive}{1} verwijderde waarschuwing van {2} met de reden: {3}"
-	}
-	
-	"WS_UnWarnPlayerPersonal"
-	{
-		"#format"	"{1:N},{2:s}"
-		"en"		"{olive}{1} removed your warning with reason: {2}"
-		"ru"		"{olive}{1} снял вам предупреждение. Причина: {2}"
-		"fr"        "{olive}{1} a supprime un avertissement de pour motif: {2}"
-		"de"		"{olive}{1} Warnung von Spieler zurückgenommen. Grund: {2}"
-		"sv"		"{olive}{1} tog bort en varning på med anledningen: {2}"
-		"nl"		"{olive}{1} verwijderde waarschuwing van met de reden: {2}"
-	}
-	
-	"WS_NotWarned"
-	{
-		"#format"	"{1:N}"
-		"en"		"{blue}{1} has not been warned before."
-		"ru"		"{blue}У {1} нет предупреждений."
-		"fr"        "{blue}{1} n'a encore jamais ete averti."
-		"de"		"{blue}{1} wurde bisher nicht gewarnt."
-		"sv"		"{blue}{1} har inte varnats förut."
-		"nl"		"{blue}{1} heeft geen eerde waarschuwing gehad."
-	}
-	
-	"WS_ResetPlayer"
-	{
-		"#format"	"{1:N},{2:N},{3:s}"
-		"en"		"{olive}{1} reseted {2}'s warnings with reason: {3}"
-		"ru"		"{olive}{1} сбросил предупреждения игрока {2}. Причина: {3}"
-		"fr"        "{olive}{1} suppression des avertissements de {2} pour motif: {3}"
-		"de"		"{olive}{1} {2} Wrnungen wurden zurückgesetzt! Grund: {3}"
-		"sv"		"{olive}{1} återställde {2}'s varningar med anleningen: {3}"
-		"nl" 		"{olive}{1} resetde {2}'s waarschuwingen met de reden: {3}"
-	}
-	
-	"WS_ResetPlayerPersonal"
-	{
-		"#format"	"{1:N},{2:s}"
-		"en"		"{olive}{1} reseted your warnings with reason: {2}"
-		"ru"		"{olive}{1} сбросил ваши предупреждения. Причина: {2}"
-		"fr"        "{olive}{1} suppression des avertissements de pour motif: {2}"
-		"de"		"{olive}{1} Wrnungen wurden zurückgesetzt! Grund: {2}"
-		"sv"		"{olive}{1} återställde varningar med anleningen: {2}"
-		"nl" 		"{olive}{1} resetde waarschuwingen met de reden: {2}"
-	}
-	
-	"WS_Console"
-	{
-		"#format"	"{1:N},{2:i}"
-		"en"		"{olive}Player {1} has been warned {2} time(s) before."
-		"ru"		"{olive}Игрок {1} был предупрежден {2} раз(а)."
-		"fr"        "{olive}Le joueur {1} a deja ete averti {2} fois auparavant."
-		"de" 		"{olive}Spieler {1} wurde {2} mal gewarnt."
-		"sv"        "{olive}Spelaren {1} har varnats {2} gånger förut."
-		"nl"		"{olive}Speler {1} is gewaarschuwd {2} keren voordat."
-	}
-	
-	//-----------------------------------menus.sp------------------------------------
-	
-	"WS_AdminMenuOption"
-	{
-		"en"		"Warnings menu"
-		"ru"		"Меню предупреждений"
-	}
-	
-	"WS_AdminMenuTitle"
-	{
-		"en"		"Select option"
-		"ru"		"Выберите опцию"
-	}
+    "WS_Prefix"
+    {
+        "en"		"[WarnSystem]"
+    }
+    
+    "WS_ColoredPrefix"
+    {
+        "en"		"{lightgreen}[WarnSystem]{default}"
+    }
+    
+    //---------------------------------WarnSystem.sp----------------------------
+    
+    "WS_MaxKick"
+    {
+        "en"		"You have been kicked for reaching maximum warnings"
+        "ru"		"Вы кикнуты за макс. кол-во предупреждений"
+        "fr"		"Tu as ete kicke apres avoir ete suffisamment averti"
+        "de"		"Du wurdest gekickt wegen Ueberschreitung der Maximalgrenze von Warnungen"
+        "sv"		"Du har blivit utslängd för ha nått max antal varningar"
+        "nl"		"Je bent gekickt omdat je teveel waarschuwingen hebt"
+    }
+    
+    "WS_MaxBan"
+    {
+        "en"		"You have been banned for reaching maximum warnings"
+        "en"		"Вы забанены за макс. кол-во предупреждений"
+        "fr"		"Tu as ete banni apres avoir ete suffisamment averti"
+        "de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von Warnungen"
+        "sv"		"Du har blivit bannlyst för ha nått max antal varningar"
+        "nl"		"Je bent verbannen voor teveel waarschuwingen hebben"
+    }
+    
+    "WS_Message"
+    {
+        "en"		"{lightred}You have been issued a warning. Follow the rules or further actions will be taken."
+        "ru"		"{lightred}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
+        "fr"		"{lightred}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
+        "de"		"{lightred}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
+        "sv"		"{lightred}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
+        "nl"		"{lightred}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
+    }
+    
+    "WS_PunishKick"
+    {
+        "#format"	"{1:s}"
+        "en"		"You have been kicked for receiving a warning (Reason:{1})"
+        "en"		"Вы кикнуты за предупреждение (Причина:{1})"
+        "fr"        "Tu as ete kicke en guise d'avertissement (Motif: {1})"
+        "de"		"Du wurdest gekickt, weil Du eine Warnung erhalten hast"
+        "sv"		"Du har blivit utslängd för att ha mottagit en varning (Anledning: {1})"
+        "nl"		"Je bent gekickt vanwege een waarschuwing (Reden: {1})"
+    }
+    
+    "WS_PunishBan"
+    {
+        "#format"	"{1:s}"
+        "en"		"You received a warning (Reason: {1})"
+        "ru"		"Вы забанены за предупреждение (Причина: {1})"
+        "fr"        "Tu viens de recevoir un avertissement (Motif: {1})"
+        "de"		"Du wurdest gewarnt"
+        "sv"		"Du blev varnad (Anledning: {1})"
+        "nl"		"Je ontvangt een waarschuwing (Reden: {1})"
+    }
+    
+    //---------------------------------database.sp---------------------------------
+    
+    "WS_PlayerWarns"
+    {
+        "#format"	"{1:N},{2:i}"
+        "en"		"{blue}{1} has connected with ({2}) Prior Warnings."
+        "ru"		"{blue}{1} подключился. У него ({2}) активных предупреждений."
+        "fr"		"{blue}{1} connecte avec {2} avertissement(s) en memoire"
+        "de"		"{blue}{1} hat sich mit {2} vergangenen Warnungen verbunden"
+        "sv"		"{blue}{1} anslöt med {2} föregående varning(ar)"
+        "nl"		"{blue}{1} verbond met {2} vorige waarschuwing(en)"
+    }
+    
+    "WS_WarnPlayer"
+    {
+        "#format"	"{1:N},{2:N},{3:s}"
+        "en"		"{olive}{1} issued a warning on {2} with reason: {3}"
+        "ru"		"{olive}{1} выдал предупреждение {2}. Причина: {3}"
+        "fr"		"{olive}{1} a donne un avertissement a {2} pour motif: {3}"
+        "de"		"{olive}{1} {2} wurde mit gewarnt mit dem Grund: {3}"
+        "sv"		"{olive}{1} utfärdade en varning på {2} med anledningen: {3}"
+        "nl"		"{olive}{1} heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
+    }
+    
+    "WS_WarnPlayerPersonal"
+    {
+        "#format"	"{1:N},{2:s}"
+        "en"		"{olive}{1} issued a warning to you with reason: {2}"
+        "ru"		"{olive}{1} выдал вам предупреждение. Причина: {2}"
+        "fr"		"{olive}{1} a donne un avertissement pour motif: {2}"
+        "de"		"{olive}{1} wurde mit gewarnt mit dem Grund: {2}"
+        "sv"		"{olive}{1} utfärdade en varning på med anledningen: {2}"
+        "nl"		"{olive}{1} heeft een waarschuwing aan gegegeven met de reden: {2}"
+    }
+    
+    "WS_CantTargetYourself"
+    {
+        "en"		"{lightred}Can't target yourself."
+        "ru"		"{lightred}Нельзя выбрать самого себя."
+    }
+    
+    "WS_UnWarnPlayer"
+    {
+        "#format"	"{1:N},{2:N},{3:s}"
+        "en"		"{olive}{1} removed a warning on {2} with reason: {3}"
+        "ru"		"{olive}{1} снял предупреждение у игрока {2}. Причина: {3}"
+        "fr"        "{olive}{1} a supprime un avertissement de {2} pour motif: {3}"
+        "de"		"{olive}{1} Warnung von Spieler {2} zurückgenommen. Grund: {3}"
+        "sv"		"{olive}{1} tog bort en varning på {2} med anledningen: {3}"
+        "nl"		"{olive}{1} verwijderde waarschuwing van {2} met de reden: {3}"
+    }
+    
+    "WS_UnWarnPlayerPersonal"
+    {
+        "#format"	"{1:N},{2:s}"
+        "en"		"{olive}{1} removed your warning with reason: {2}"
+        "ru"		"{olive}{1} снял вам предупреждение. Причина: {2}"
+        "fr"        "{olive}{1} a supprime un avertissement de pour motif: {2}"
+        "de"		"{olive}{1} Warnung von Spieler zurückgenommen. Grund: {2}"
+        "sv"		"{olive}{1} tog bort en varning på med anledningen: {2}"
+        "nl"		"{olive}{1} verwijderde waarschuwing van met de reden: {2}"
+    }
+    
+    "WS_NotWarned"
+    {
+        "#format"	"{1:N}"
+        "en"		"{blue}{1} has not been warned before."
+        "ru"		"{blue}У {1} нет предупреждений."
+        "fr"        "{blue}{1} n'a encore jamais ete averti."
+        "de"		"{blue}{1} wurde bisher nicht gewarnt."
+        "sv"		"{blue}{1} har inte varnats förut."
+        "nl"		"{blue}{1} heeft geen eerde waarschuwing gehad."
+    }
+    
+    "WS_ResetPlayer"
+    {
+        "#format"	"{1:N},{2:N},{3:s}"
+        "en"		"{olive}{1} reseted {2}'s warnings with reason: {3}"
+        "ru"		"{olive}{1} сбросил предупреждения игрока {2}. Причина: {3}"
+        "fr"        "{olive}{1} suppression des avertissements de {2} pour motif: {3}"
+        "de"		"{olive}{1} {2} Wrnungen wurden zurückgesetzt! Grund: {3}"
+        "sv"		"{olive}{1} återställde {2}'s varningar med anleningen: {3}"
+        "nl" 		"{olive}{1} resetde {2}'s waarschuwingen met de reden: {3}"
+    }
+    
+    "WS_ResetPlayerPersonal"
+    {
+        "#format"	"{1:N},{2:s}"
+        "en"		"{olive}{1} reseted your warnings with reason: {2}"
+        "ru"		"{olive}{1} сбросил ваши предупреждения. Причина: {2}"
+        "fr"        "{olive}{1} suppression des avertissements de pour motif: {2}"
+        "de"		"{olive}{1} Wrnungen wurden zurückgesetzt! Grund: {2}"
+        "sv"		"{olive}{1} återställde varningar med anleningen: {2}"
+        "nl" 		"{olive}{1} resetde waarschuwingen met de reden: {2}"
+    }
+    
+    "WS_Console"
+    {
+        "#format"	"{1:N},{2:i}"
+        "en"		"{olive}Player {1} has been warned {2} time(s) before."
+        "ru"		"{olive}Игрок {1} был предупрежден {2} раз(а)."
+        "fr"        "{olive}Le joueur {1} a deja ete averti {2} fois auparavant."
+        "de" 		"{olive}Spieler {1} wurde {2} mal gewarnt."
+        "sv"        "{olive}Spelaren {1} har varnats {2} gånger förut."
+        "nl"		"{olive}Speler {1} is gewaarschuwd {2} keren voordat."
+    }
+    
+    //-----------------------------------menus.sp------------------------------------
+    
+    "WS_AdminMenuOption"
+    {
+        "en"		"Warnings menu"
+        "ru"		"Меню предупреждений"
+    }
+    
+    "WS_AdminMenuTitle"
+    {
+        "en"		"Select option"
+        "ru"		"Выберите опцию"
+    }
     
     "WS_CPWTitle"
     {
@@ -232,136 +232,136 @@
         "en"        "Date: {1}"
         "ru"        "Дата: {1}"
     }
-	
-	"WS_AdminMenuWarnTitle"
-	{
-		"en"		"Warn player"
-		"ru"		"Выдать предупр."
-		"fr"        "Donner un avertissement"
-		"de"		"warne Spieler"
-		"sv"		"Varna spelare"
-		"nl"		"Waarschuw speler"
-	}
-	
-	"WS_AdminMenuUnWarnTitle"
-	{
-		"en"		"UnWarn player"
-		"ru"		"Снять предупр."
-		"fr"        "Retirer un avertissement"
-		"de"		"entwarne Spieler"
-		"sv"		"Ovarna spelare"
-		"nl"		"De-waarschuw speler"
-	}
-	
-	"WS_AdminMenuResetWarnTitle"
+    
+    "WS_AdminMenuWarnTitle"
+    {
+        "en"		"Warn player"
+        "ru"		"Выдать предупр."
+        "fr"        "Donner un avertissement"
+        "de"		"warne Spieler"
+        "sv"		"Varna spelare"
+        "nl"		"Waarschuw speler"
+    }
+    
+    "WS_AdminMenuUnWarnTitle"
+    {
+        "en"		"UnWarn player"
+        "ru"		"Снять предупр."
+        "fr"        "Retirer un avertissement"
+        "de"		"entwarne Spieler"
+        "sv"		"Ovarna spelare"
+        "nl"		"De-waarschuw speler"
+    }
+    
+    "WS_AdminMenuResetWarnTitle"
     {
         "en"        "Reset warnings"
-		"ru"        "Сбросить предупр."
+        "ru"        "Сбросить предупр."
         "fr"        "Réinitialiser les avertissements"
         "de"        "Warnungen Zurücksetzen"
         "sv"        "Återställ varningar"
         "nl" 		"Reset waarschuwingen"
-	}
-	
-	"WS_AdminMenuCheckWarnTitle"
-	{
-		"en"		"Check warnings"
-		"ru"		"Узнать о предупр."
-		"fr"        "Controler les avertissements"
-		"de"		"Warnungen Überprüfen"
-		"sv"		"Kolla varningar"
-		"nl" 		"Check waarschuwingen"
-	}
-	
-	"WS_TargetMenuTitle"
-	{
-		"en"		"Select player"
-		"ru"		"Выбрать игрока"
-		"fr"        "Selectionner un joueur"
-		"de"		"Spieler wählen"
-		"sv"		"Välj spelare"
-		"nl"		"Selecteer speler"
-	}
-	
-	"WS_AdminMenuReasonTitle"
-	{
-		"en"		"Select reason"
-		"en"		"Выберите причину"
-		"fr"        "Choisir un motif"
-		"de"		"Grund wählen"
-		"sv"		"Välj anledning"
-		"nl"		"Selecteer reden"
-	}
-	
-	"WS_AgreementTitle"
-	{
-		"en"		"Terms Agreement"
-		"ru"		"Соглашение с правилами"
-		"fr"        "termes d'accord"
-		"de"        "Bedingungen akzeptieren"
-		"sv"		"Villkors avtal"
-		"nl" 		"Voorwaarden accepteren"
-	}
-	
-	"WS_AgreementAgree"
-	{
-		"en"		"I agree"
-		"ru"		"Я согласен"
-		"fr"        "J'accepte"
-		"de"        "Ich stimme zu"
-		"sv"		"Acceptera"
-		"nl" 		"Ik accepteer"
-	}
-	
-	"WS_AgreementMessage"
-	{
-		"en"		"{blue}Thank you for understanding, you can now play again."
-		"ru"		"{blue}Спасибо за понимание, вы можете играть дальше."
-		"fr"        "{blue}Merci de ta comprehension, tu peux jouer a nouveau."
-		"de"        "{blue}Vielen Dank für Dein Verständnis. Du darfst nun wieder spielen."
-		"sv"		"{blue}Tack för din förståelse, du kan nu spela igen."
-		"nl" 		"{blue}Bedankt voor het begrip, nu kun je weer spelen."
-	}
-	
-	//---------------------------------commands.sp--------------------------------------
-	
-	"WS_WarnArguments"
-	{
-		"en"		"Usage: sm_warn <#userid|name> reason"
-		"ru"		"Использование: sm_warn <#userid|ник> причина"
-		"fr"		"Utilisation: sm_warn <#userid|nom> motif"
-		"de"		"Benutzung: sm_warn <#userid|name> Grund"
-		"sv"		"Användning: sm_warn <#userid|namn> anledning"
-		"nl"		"Gebruik: sm_warn <#userid|naam> reden"
-	}
-	
-	"WS_UnWarnArguments"
-	{
-		"en"		"Usage: sm_unwarn <#userid|name> reason"
-		"ru"		"Использование: sm_unwarn <#userid|ник> причина"
-		"fr"		"Utilisation: sm_unwarn <#userid|nom> motif"
-		"de" 		"Benutzung: sm_unwarn <#userid|name> Grund"
-		"sv"		"Användning: sm_unwarn <#userid|namn> anledning"
-		"nl"		"Gebruik: sm_unwarn <#userid|naam> reden"
-	}
-	
-	"WS_ResetWarnArguments"
-	{
-		"en"		"Usage: sm_resetwarn <#userid|name> reason"
-		"ru"		"Использование: sm_resetwarn <#userid|ник> причина"
-		"fr"		"Utilisation: sm_resetwarn <#userid|nom> motif"
-		"de" 		"Benutzung: sm_resetwarn <#userid|name> Grund"
-		"sv"		"Användning: sm_resetwarn <#userid|namn> anledning"
-		"nl"		"Gebruik: sm_resetwarn <#userid|naam> reden"
-	}
+    }
+    
+    "WS_AdminMenuCheckWarnTitle"
+    {
+        "en"		"Check warnings"
+        "ru"		"Узнать о предупр."
+        "fr"        "Controler les avertissements"
+        "de"		"Warnungen Überprüfen"
+        "sv"		"Kolla varningar"
+        "nl" 		"Check waarschuwingen"
+    }
+    
+    "WS_TargetMenuTitle"
+    {
+        "en"		"Select player"
+        "ru"		"Выбрать игрока"
+        "fr"        "Selectionner un joueur"
+        "de"		"Spieler wählen"
+        "sv"		"Välj spelare"
+        "nl"		"Selecteer speler"
+    }
+    
+    "WS_AdminMenuReasonTitle"
+    {
+        "en"		"Select reason"
+        "en"		"Выберите причину"
+        "fr"        "Choisir un motif"
+        "de"		"Grund wählen"
+        "sv"		"Välj anledning"
+        "nl"		"Selecteer reden"
+    }
+    
+    "WS_AgreementTitle"
+    {
+        "en"		"Terms Agreement"
+        "ru"		"Соглашение с правилами"
+        "fr"        "termes d'accord"
+        "de"        "Bedingungen akzeptieren"
+        "sv"		"Villkors avtal"
+        "nl" 		"Voorwaarden accepteren"
+    }
+    
+    "WS_AgreementAgree"
+    {
+        "en"		"I agree"
+        "ru"		"Я согласен"
+        "fr"        "J'accepte"
+        "de"        "Ich stimme zu"
+        "sv"		"Acceptera"
+        "nl" 		"Ik accepteer"
+    }
+    
+    "WS_AgreementMessage"
+    {
+        "en"		"{blue}Thank you for understanding, you can now play again."
+        "ru"		"{blue}Спасибо за понимание, вы можете играть дальше."
+        "fr"        "{blue}Merci de ta comprehension, tu peux jouer a nouveau."
+        "de"        "{blue}Vielen Dank für Dein Verständnis. Du darfst nun wieder spielen."
+        "sv"		"{blue}Tack för din förståelse, du kan nu spela igen."
+        "nl" 		"{blue}Bedankt voor het begrip, nu kun je weer spelen."
+    }
+    
+    //---------------------------------commands.sp--------------------------------------
+    
+    "WS_WarnArguments"
+    {
+        "en"		"Usage: sm_warn <#userid|name> reason"
+        "ru"		"Использование: sm_warn <#userid|ник> причина"
+        "fr"		"Utilisation: sm_warn <#userid|nom> motif"
+        "de"		"Benutzung: sm_warn <#userid|name> Grund"
+        "sv"		"Användning: sm_warn <#userid|namn> anledning"
+        "nl"		"Gebruik: sm_warn <#userid|naam> reden"
+    }
+    
+    "WS_UnWarnArguments"
+    {
+        "en"		"Usage: sm_unwarn <#userid|name> reason"
+        "ru"		"Использование: sm_unwarn <#userid|ник> причина"
+        "fr"		"Utilisation: sm_unwarn <#userid|nom> motif"
+        "de" 		"Benutzung: sm_unwarn <#userid|name> Grund"
+        "sv"		"Användning: sm_unwarn <#userid|namn> anledning"
+        "nl"		"Gebruik: sm_unwarn <#userid|naam> reden"
+    }
+    
+    "WS_ResetWarnArguments"
+    {
+        "en"		"Usage: sm_resetwarn <#userid|name> reason"
+        "ru"		"Использование: sm_resetwarn <#userid|ник> причина"
+        "fr"		"Utilisation: sm_resetwarn <#userid|nom> motif"
+        "de" 		"Benutzung: sm_resetwarn <#userid|name> Grund"
+        "sv"		"Användning: sm_resetwarn <#userid|namn> anledning"
+        "nl"		"Gebruik: sm_resetwarn <#userid|naam> reden"
+    }
 
-	"WS_CheckWarnArguments"
-	{
-		"en"		"Usage: sm_checkwarn <#userid|name>"
-		"en"		"Использование: sm_checkwarn <#userid|ник>"
-		"fr"        "Utilisation: sm_checkwarn <#userid|nom>"
-		"de" 		"Benutzung: sm_checkwarn <#userid|name>"
-		"sv"		"Användning: sm_checkwarn <#userid|namn>"
-		"nl"		"Gebruik: sm_checkwarn <#userid|naam>"
-	}
+    "WS_CheckWarnArguments"
+    {
+        "en"		"Usage: sm_checkwarn <#userid|name>"
+        "en"		"Использование: sm_checkwarn <#userid|ник>"
+        "fr"        "Utilisation: sm_checkwarn <#userid|nom>"
+        "de" 		"Benutzung: sm_checkwarn <#userid|name>"
+        "sv"		"Användning: sm_checkwarn <#userid|namn>"
+        "nl"		"Gebruik: sm_checkwarn <#userid|naam>"
+    }
 }
