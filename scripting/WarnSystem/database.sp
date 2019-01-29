@@ -312,7 +312,7 @@ public void SQL_UploadData(Database hDatabase, DBResultSet hDatabaseResults, con
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		if(g_bLogQuery)
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
-		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery);
+		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
 	}
 }
 
