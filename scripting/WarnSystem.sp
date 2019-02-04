@@ -1,9 +1,15 @@
 //---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
 
+<<<<<<< HEAD
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
 #define PLUGIN_VERSION      "1.4"
+=======
+#define PLUGIN_NAME         "WarnSystem"
+#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
+#define PLUGIN_VERSION      "1.3"
+>>>>>>> release
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -18,10 +24,34 @@
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
+<<<<<<< HEAD
 #tryinclude <SteamWorks>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
+=======
+#define REQUIRE_PLUGINS
+#define REQUIRE_EXTENSIONS
+
+/*#tryinclude "WarnSystem/stats.sp"
+#ifdef __stats_included
+	#undef REQUIRE_PLUGIN
+	#undef REQUIRE_EXTENSIONS
+	#tryinclude <SteamWorks>
+	#tryinclude <socket>
+	#tryinclude <cURL>
+	#define REQUIRE_PLUGINS
+	#define REQUIRE_EXTENSIONS
+	
+	#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
+	#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
+	#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
+	#define PLUGIN_STATS_SCRIPT "add_server.php"
+#endif */
+
+#pragma newdecls required
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
+>>>>>>> release
 //----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
@@ -36,6 +66,7 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
+<<<<<<< HEAD
 #if defined _SteamWorks_Included
 #include "WarnSystem/stats.sp"
 #endif 
@@ -44,6 +75,8 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 
 
 
+=======
+>>>>>>> release
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -83,11 +116,17 @@ public void OnPluginStart()
 	InitializeDatabase();
 	InitializeCommands();
 	
+<<<<<<< HEAD
 	#if defined _SteamWorks_Included
 	// Stats work
 	if (LibraryExists("SteamWorks"))
 		SteamWorks_SteamServersConnected();
 	#endif
+=======
+	/*#ifdef __stats_included
+		InitializeStats();
+	#endif */
+>>>>>>> release
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -112,16 +151,29 @@ public void OnLibraryAdded(const char[] sName)
 	if (StrEqual(sName, "adminmenu"))
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
+<<<<<<< HEAD
+=======
+	/*#ifdef __stats_included
+		STATS_OnLibraryAdded(sName);
+	#endif*/
+>>>>>>> release
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
+<<<<<<< HEAD
+=======
+	/*#ifdef __stats_included
+		STATS_OnLibraryRemoved(sName);
+	#endif*/
+>>>>>>> release
 }
 
 public void OnMapStart()
 {
+<<<<<<< HEAD
 	#if defined _SteamWorks_Included
 	// Stats work
 	if (LibraryExists("SteamWorks"))
@@ -129,6 +181,13 @@ public void OnMapStart()
 	#endif
 	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);*/
+=======
+	/*#ifdef __stats_included
+		STATS_AddServer(APIKEY, PLUGIN_VERSION);
+	#endif*/
+	for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);
+>>>>>>> release
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -153,12 +212,20 @@ public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {
   IsClientInGame(iClient) &&
+<<<<<<< HEAD
 	LoadPlayerData(iClient);
+=======
+    LoadPlayerData(iClient);
+>>>>>>> release
 }
 
 public void OnClientPutInServer(int iClient) {
   IsClientAuthorized(iClient) &&
+<<<<<<< HEAD
 	LoadPlayerData(iClient);
+=======
+    LoadPlayerData(iClient);
+>>>>>>> release
 }
 
 //---------------------------------------------------SOME FEATURES-------------------------------------------------
@@ -221,7 +288,11 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 					ForcePlayerSuicide(iClient);
 				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
+<<<<<<< HEAD
 			case 4: 
+=======
+			case 4:
+>>>>>>> release
 				PunishmentSix(iClient, iAdmin, sReason);
 			case 5:
 			{
