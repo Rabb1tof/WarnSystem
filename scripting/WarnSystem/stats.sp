@@ -1,72 +1,27 @@
-/***************************************
- *         Stats module by             *
- *     Kruzya aka CrazyHackGUT         *
- ***************************************
- */
+stock const char API_KEY[] = "81d0f7e3b9d61d19209fe713232177ba";
+stock const char URL[] = "http://stats.tibari.ru/api/v1/add_server";
 
-bool g_bSteamWorks;
-bool g_bSocket;
-bool g_bCURL;
-
-void STATS_OnLibraryAdded(const char[] szLib)
+/* Stats pusher */
+public int SteamWorks_SteamServersConnected()
 {
-    if (StrEqual(szLib, "SteamWorks"))
-        g_bSteamWorks = true;
-    else if (StrEqual(szLib, "socket"))
-        g_bSocket = true;
-    else if (StrEqual(szLib, "curl"))
-        g_bCURL = true;
-}
-
-void STATS_OnLibraryRemoved(const char[] szLib)
-{
-    if (StrEqual(szLib, "SteamWorks"))
-        g_bSteamWorks = false;
-    else if (StrEqual(szLib, "socket"))
-        g_bSocket = false;
-    else if (StrEqual(szLib, "curl"))
-        g_bCURL = false;
-}
-
-void InitializeStats()
-{
-    g_bSteamWorks   = LibraryExists("SteamWorks");
-    g_bSocket       = LibraryExists("socket");
-    g_bCURL         = LibraryExists("curl");
-}
-
-void STATS_MarkNativesAsOptional()
-{
-    // Curl natives do not marks "optional" automatically, lol
-    MarkNativeAsOptional("curl_easy_setopt_function");
-    MarkNativeAsOptional("curl_easy_perform_thread");
-    MarkNativeAsOptional("curl_easy_setopt_string");
-    MarkNativeAsOptional("curl_easy_setopt_handle");
-    MarkNativeAsOptional("curl_easy_setopt_int");
-    MarkNativeAsOptional("curl_easy_strerror");
-    MarkNativeAsOptional("curl_slist_append");
-    MarkNativeAsOptional("curl_easy_init");
-    MarkNativeAsOptional("curl_slist");
-
-    // Socket natives do not marks "optional" automatically, lol
-    MarkNativeAsOptional("SocketConnect");
-    MarkNativeAsOptional("SocketCreate");
-    MarkNativeAsOptional("SocketSetArg");
-    MarkNativeAsOptional("SocketSend");
-}
-
-void STATS_AddServer(const char[] szKey, const char[] szVersion) {
-    if (g_bSteamWorks) {
-        STATS_SteamWorks_AddServer(szKey, szVersion);
-    } else if (g_bCURL) {
-        STATS_CURL_AddServer(szKey, szVersion);
-    } else if (g_bSocket) {
-        STATS_Socket_AddServer(szKey, szVersion);
-    } else {
-        LogWarnings("Can't add server to SM plugin statistics. Not found any compatible extension. (SteamWorks, cURL, socket)");
+    Handle plugin = GetMyHandle();
+    if (GetPluginStatus(plugin) == Plugin_Running)
+    {
+        char cBuffer[256], cVersion[12];
+        GetPluginInfo(plugin, PlInfo_Version, cVersion, sizeof(cVersion));
+        FormatEx(cBuffer, sizeof(cBuffer), "%s", URL);
+        Handle hndl = SteamWorks_CreateHTTPRequest(k_EHTTPMethodPOST, cBuffer);
+        FormatEx(cBuffer, sizeof(cBuffer), "key=%s&ip=%s&port=%d&version=%s", API_KEY, g_sAddress, g_iPort, cVersion);
+        SteamWorks_SetHTTPRequestRawPostBody(hndl, "application/x-www-form-urlencoded", cBuffer, sizeof(cBuffer));
+        SteamWorks_SetHTTPCallbacks(hndl, SteamWorks_OnTransferComplete);
+        SteamWorks_SendHTTPRequest(hndl);
+        delete hndl;
     }
 }
 
+<<<<<<< HEAD
+public int SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, bool bRequestSuccessful, EHTTPStatusCode eStatusCode) {
+=======
 void STATS_GetIP(char[] szBuffer, int iMaxLength) {
     if (g_bSteamWorks) {
         STATS_SteamWorks_GetIP(szBuffer, iMaxLength);
@@ -103,6 +58,7 @@ void STATS_SteamWorks_GetIP(char[] szBuffer, int iMaxLength) {
 }
 
 public int STATS_SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, bool bRequestSuccessful, EHTTPStatusCode eStatusCode) {
+>>>>>>> release
     delete hRequest;
     switch(eStatusCode) {
         case k_EHTTPStatusCode200OK:                    LogAction(-1, -1, "[WarnSystem] Server successfully added/refreshed");
@@ -113,6 +69,8 @@ public int STATS_SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, b
         case k_EHTTPStatusCode413RequestEntityTooLarge: LogWarnings("[WarnSystem] Request Entity Too Large");
     }
 }
+<<<<<<< HEAD
+=======
 
 /**
  * cURL
@@ -214,3 +172,4 @@ public int STATS_Socket_OnError(Handle hSocket, const int iErrorType, const int 
     LogWarnings("[WarnSystem] OnSocketError: Error Type %d, Error Num %d", iErrorType, iErrorNum);
     STATS_Socket_OnDisconnected(hSocket, data);
 }
+>>>>>>> release

@@ -1,9 +1,15 @@
 //---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
 
+<<<<<<< HEAD
+#define PLUGIN_NAME         "[WarnSystem] Core"
+#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
+#define PLUGIN_VERSION      "1.4"
+=======
 #define PLUGIN_NAME         "WarnSystem"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
 #define PLUGIN_VERSION      "1.3"
+>>>>>>> release
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -14,9 +20,16 @@
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
+#include <dbi>
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
+<<<<<<< HEAD
+#tryinclude <SteamWorks>
+#define REQUIRE_PLUGINS
+#define REQUIRE_EXTENSIONS
+
+=======
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
@@ -38,17 +51,32 @@
 
 #pragma newdecls required
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
+>>>>>>> release
 //----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
-	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
+	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
 bool g_bIsFuckingGame;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride;
+int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1], g_iPort;
 
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
+#define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
+
+<<<<<<< HEAD
+#if defined _SteamWorks_Included
+#include "WarnSystem/stats.sp"
+#endif 
+
+#pragma newdecls required
+
+
+
+=======
+>>>>>>> release
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -78,15 +106,27 @@ public void OnPluginStart()
 	BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnWarnReasons.cfg");
 	BuildPath(Path_SM, g_sPathResetReasons, sizeof(g_sPathResetReasons), "configs/WarnSystem/ResetWarnReasons.cfg");
 	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
-	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem.log");
+	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
+	if(!DirExists(g_sLogPath))
+		CreateDirectory(g_sLogPath, 511);
+	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
+	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
 	
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
 	
+<<<<<<< HEAD
+	#if defined _SteamWorks_Included
+	// Stats work
+	if (LibraryExists("SteamWorks"))
+		SteamWorks_SteamServersConnected();
+	#endif
+=======
 	/*#ifdef __stats_included
 		InitializeStats();
 	#endif */
+>>>>>>> release
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -94,6 +134,9 @@ public void OnPluginStart()
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
 	}
+	
+	GetIPServer();
+	GetPort();
 		
 	strcopy(g_sClientIP[0], 65, "localhost");
 	g_iAccountID[0] = -1;
@@ -108,27 +151,43 @@ public void OnLibraryAdded(const char[] sName)
 	if (StrEqual(sName, "adminmenu"))
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
+<<<<<<< HEAD
+=======
 	/*#ifdef __stats_included
 		STATS_OnLibraryAdded(sName);
 	#endif*/
+>>>>>>> release
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
+<<<<<<< HEAD
+=======
 	/*#ifdef __stats_included
 		STATS_OnLibraryRemoved(sName);
 	#endif*/
+>>>>>>> release
 }
 
 public void OnMapStart()
 {
+<<<<<<< HEAD
+	#if defined _SteamWorks_Included
+	// Stats work
+	if (LibraryExists("SteamWorks"))
+		SteamWorks_SteamServersConnected();
+	#endif
+	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);*/
+=======
 	/*#ifdef __stats_included
 		STATS_AddServer(APIKEY, PLUGIN_VERSION);
 	#endif*/
 	for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);
+>>>>>>> release
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -145,18 +204,28 @@ public void OnMapStart()
 				PrecacheSound(g_sWarnSoundPath, true);
 		}
 	}
+	if(g_bDeleteExpired)
+		CheckExpiredWarns();
 }
 
 public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {
   IsClientInGame(iClient) &&
+<<<<<<< HEAD
+	LoadPlayerData(iClient);
+=======
     LoadPlayerData(iClient);
+>>>>>>> release
 }
 
 public void OnClientPutInServer(int iClient) {
   IsClientAuthorized(iClient) &&
+<<<<<<< HEAD
+	LoadPlayerData(iClient);
+=======
     LoadPlayerData(iClient);
+>>>>>>> release
 }
 
 //---------------------------------------------------SOME FEATURES-------------------------------------------------
@@ -169,7 +238,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
-        }
+		}
 }
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
@@ -219,7 +288,11 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 					ForcePlayerSuicide(iClient);
 				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
+<<<<<<< HEAD
+			case 4: 
+=======
 			case 4:
+>>>>>>> release
 				PunishmentSix(iClient, iAdmin, sReason);
 			case 5:
 			{
@@ -253,4 +326,11 @@ public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient, iAdmin, szReason);
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+}
+
+stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }
+stock void GetPort() { g_iPort=FindConVar("hostport").IntValue; }
+stock void GetIPServer() { 
+	int iHostIP = FindConVar("hostip").IntValue;
+	FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
 }
