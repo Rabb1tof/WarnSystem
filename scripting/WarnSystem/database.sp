@@ -495,7 +495,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
 		char szName[64];
 		GetClientName(iClient, szName, sizeof(szName));
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerP, g_iAccountID[iClient], szName, g_iWarnings[iClient]);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerP, szName, g_iWarnings[iClient], g_iAccountID[iClient]);
 		hTxn.AddQuery(dbQuery); // 1 transaction
 		if(g_bLogQuery)
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerP: %s", dbQuery);
