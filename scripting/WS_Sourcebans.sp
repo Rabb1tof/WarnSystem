@@ -1,11 +1,7 @@
 #pragma semicolon 1
 #include <WarnSystem>
-#if defined _sourcebans_included
-	#include <sourcebans>
-#endif
-#if defined _materialadmin_included
-	#include <materialadmin>
-#endif
+#include <sourcebans>
+#include <materialadmin>
 #pragma newdecls required
 
 int g_iSbType;
@@ -39,7 +35,7 @@ public void OnCvarChanged(ConVar hCvar, const char[] szOV, const char[] szNV) {
     }
 }
 
-public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName);}
+/*public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName);}
 
 public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName);}
 
@@ -48,7 +44,7 @@ void SetPluginDetection(const char[] sName) {
         SetFailState("Can't find SourceBans++ or SourceBans(Old).");
 	else if(!StrEqual(sName, "materialadmin"))
 		SetFailState("Can't find MaterialAdmin.");
-}
+}*/
 
 public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {

@@ -319,7 +319,7 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
 		
 		case MenuAction_End:
-            CloseHandle(menu);
+			CloseHandle(menu);
 	}
 }
 
@@ -388,6 +388,9 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	if(!IsValidClient(iAdmin))      return;
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
+	
+	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
 	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;

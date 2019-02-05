@@ -22,7 +22,6 @@
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
-
 //----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
@@ -119,6 +118,7 @@ public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
+}
 
 public void OnMapStart()
 {
@@ -127,8 +127,8 @@ public void OnMapStart()
 	if (LibraryExists("SteamWorks"))
 		SteamWorks_SteamServersConnected();
 	#endif
-	for(int iClient = 1; iClient <= MaxClients; ++iClient)
-		LoadPlayerData(iClient);
+	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);*/
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -153,7 +153,7 @@ public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {
   IsClientInGame(iClient) &&
-    LoadPlayerData(iClient);
+	LoadPlayerData(iClient);
 }
 
 public void OnClientPutInServer(int iClient) {

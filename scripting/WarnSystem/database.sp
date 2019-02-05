@@ -1,4 +1,5 @@
 int g_iServerID = 0;
+
 char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player` ( \
 		`account_id` INTEGER PRIMARY KEY NOT NULL, \
 		`username` VARCHAR(64) NOT NULL default '', \
@@ -124,7 +125,6 @@ public void InitializeDatabase()
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
 	{
-<<<<<<< HEAD
 		g_hDatabase.SetCharset("utf8");
 		//SQL_LockDatabase(g_hDatabase);
 		Transaction hTxn = new Transaction();
@@ -138,6 +138,7 @@ public void InitializeDatabase()
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
 			//g_iServerID = 0;
+			//STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
 			
 			g_hDatabase.SetCharset("utf8");
 			//SQL_LockDatabase(g_hDatabase);
@@ -245,7 +246,6 @@ public void LoadPlayerData(int iClient)
 {
 	if(IsValidClient(iClient) && g_hDatabase)
 	{
-<<<<<<< HEAD
 		char dbQuery[513];
 		//Transaction hTxn = new Transaction();
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
@@ -443,6 +443,7 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[129])
 			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
 		}
+		
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		
@@ -494,7 +495,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
 		char szName[64];
 		GetClientName(iClient, szName, sizeof(szName));
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerP, szName, g_iWarnings[iClient], g_iAccountID[iClient]);
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerP, g_iAccountID[iClient], szName, g_iWarnings[iClient]);
 		hTxn.AddQuery(dbQuery); // 1 transaction
 		if(g_bLogQuery)
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerP: %s", dbQuery);
