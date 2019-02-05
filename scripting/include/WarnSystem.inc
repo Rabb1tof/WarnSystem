@@ -3,7 +3,7 @@
 #endif
 
 #define _warnsystem_included
-#define APIVERSION "1.3"
+#define APIVERSION "1.4"
 
 public SharedPlugin __pl_WarnSystem = {
     name = "WarnSystem",

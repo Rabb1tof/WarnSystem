@@ -9,11 +9,7 @@ ConVar g_cSbType;
 
 public Plugin myinfo =
 {
-<<<<<<< HEAD
-    name = "[WS] Sourcebans Support",
-=======
     name = "[WarnSystem] Sourcebans support (all version)",
->>>>>>> release
     author = "vadrozh, Rabb1t",
     description = "Module adds support of sb (all)",
     version = "1.1",
@@ -39,51 +35,35 @@ public void OnCvarChanged(ConVar hCvar, const char[] szOV, const char[] szNV) {
     }
 }
 
-public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName);}
+/*public void OnLibraryAdded(const char[] sName) {SetPluginDetection(sName);}
 
 public void OnLibraryRemoved(const char[] sName){SetPluginDetection(sName);}
 
 void SetPluginDetection(const char[] sName) {
-<<<<<<< HEAD
-    if (!StrEqual(sName, "sourcebans") || !StrEqual(sName, "materialadmin"))
-=======
-	if (!StrEqual(sName, "sourcebans") || !StrEqual(sName, "materialadmin"))
->>>>>>> release
-        SetFailState("Can't find MaterialAdmin or SourceBans++ or SourceBans(Old).");
-}
+	if (!StrEqual(sName, "sourcebans"))
+        SetFailState("Can't find SourceBans++ or SourceBans(Old).");
+	else if(!StrEqual(sName, "materialadmin"))
+		SetFailState("Can't find MaterialAdmin.");
+}*/
 
 public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
-<<<<<<< HEAD
-    switch(g_iSbType){
-=======
 	switch(g_iSbType){
->>>>>>> release
         case 1:     MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
         case 2:     SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
         case 3:     SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
     }
-<<<<<<< HEAD
+	
     return Plugin_Handled;
-=======
-	return Plugin_Handled;
->>>>>>> release
 }
 
 public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
-<<<<<<< HEAD
-    switch(g_iSbType){
-=======
 	switch(g_iSbType){
->>>>>>> release
         case 1:     MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
         case 2:     SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
         case 3:     SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
     }
-<<<<<<< HEAD
+	
     return Plugin_Handled;
-=======
-	return Plugin_Handled;
->>>>>>> release
 }
