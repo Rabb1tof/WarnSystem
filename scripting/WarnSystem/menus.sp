@@ -389,9 +389,6 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
 	
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
-	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;
 	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
@@ -426,7 +423,6 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
 			iID = StringToInt(szID);
 			
 			FormatEx(szdbQuery, sizeof(szdbQuery),  g_sSQL_GetInfoWarn, iID);
-			//LogMessage("Fetch warn: %s", szdbQuery);
 			g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
 			if(g_bLogQuery)
 				LogQuery("CheckPlayerWarnsMenu::SQL_GetInfoWarn: %s", szdbQuery);

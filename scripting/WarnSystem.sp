@@ -65,7 +65,7 @@ public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	LoadTranslations("WarnSystem.phrases");
+	LoadTranslations("warnsystem.phrases");
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
 	

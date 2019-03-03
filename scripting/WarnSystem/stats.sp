@@ -20,7 +20,7 @@ public int SteamWorks_SteamServersConnected()
 }
 
 public int SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, bool bRequestSuccessful, EHTTPStatusCode eStatusCode) {
-    delete hRequest;
+    //delete hRequest;
     switch(eStatusCode) {
         case k_EHTTPStatusCode200OK:                    LogAction(-1, -1, "[WarnSystem] Server successfully added/refreshed");
         case k_EHTTPStatusCode400BadRequest:            LogWarnings("[WarnSystem] Bad request");

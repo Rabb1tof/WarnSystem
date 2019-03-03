@@ -86,24 +86,6 @@ INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id` \
 WHERE `ws_warn`.`warn_id` = '%i';",
 	g_sClientIP[MAXPLAYERS+1][65];
-   // g_sAddress[64];
-   
-   /* CREATE TABLE IF NOT EXISTS `ws_warn` (
-  `warn_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор предупреждения',
-  `admin_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока-администратора, выдавшего предупреждение',
-  `client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',
-  `server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',
-  `reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',
-  `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',
-  `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',
-  PRIMARY KEY (`warn_id`),
-  KEY `FK_ws_warn_ws_server` (`server_id`),
-  KEY `FK_ws_warn_ws_admin` (`admin_id`),
-  KEY `FK_ws_warn_ws_client` (`client_id`),
-  CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_ws_warn_ws_server` FOREIGN KEY (`server_id`) REFERENCES `ws_server` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Все выданные когда-либо предупреждения'; */
 	
 int g_iAccountID[MAXPLAYERS+1];
 
@@ -126,31 +108,19 @@ public void InitializeDatabase()
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
 	{
 		g_hDatabase.SetCharset("utf8");
-		//SQL_LockDatabase(g_hDatabase);
 		Transaction hTxn = new Transaction();
 		hTxn.AddQuery(g_sSQL_CreateTablePlayers_SQLite);
 		hTxn.AddQuery(g_sSQL_CreateTableWarns_SQLite);
 		g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
-		//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTablePlayers_SQLite);
-		//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTableWarns_SQLite);
-		//SQL_UnlockDatabase(g_hDatabase);
 	} else
 		if (hDatabaseDriver == SQL_GetDriver("mysql"))
 		{
-			//g_iServerID = 0;
-			//STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
-			
 			g_hDatabase.SetCharset("utf8");
-			//SQL_LockDatabase(g_hDatabase);
 			Transaction hTxn = new Transaction();
 			hTxn.AddQuery(g_sSQL_CreateTablePlayers_MySQL); // 0
 			hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
 			hTxn.AddQuery(g_sSQL_CreateTableWarns_MySQL); // 2
 			g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
-			//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTablePlayers_MySQL);
-			//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTableWarns_MySQL);
-			//g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
-			//SQL_UnlockDatabase(g_hDatabase);
 		} else
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
 	
@@ -190,13 +160,6 @@ public void SQL_TransactionFailed(Database hDatabase, any data, int iNumQueries,
 	FormatEx(szBuffer, sizeof(szBuffer), "Query: %s, %i index: %s", szQuery, iFailIndex, szError);
 	LogWarnings(szBuffer);
 }
-
-/*public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
-{
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
-		SetFailState("[WarnSystem] SQL_CreateTableServers: %s", sError);
-	GetServerID();
-}*/
 
 public void GetServerID()
 {
@@ -247,28 +210,12 @@ public void LoadPlayerData(int iClient)
 	if(IsValidClient(iClient) && g_hDatabase)
 	{
 		char dbQuery[513];
-		//Transaction hTxn = new Transaction();
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
 		GetClientIP(iClient, g_sClientIP[iClient], 65);
-		/*FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
-		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
-		if(g_bLogQuery)
-			LogQuery("LoadPlayerData::g_sSQL_SelectWarns: %s", dbQuery);*/
-		//hTxn.AddQuery(dbQuery);
-		// `account_id`, `username`, `warns`
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_CheckData, g_iAccountID[iClient]);
 		g_hDatabase.Query(SQL_CheckData, dbQuery, iClient);
 		if(g_bLogQuery)
 			LogQuery("LoadPlayerData::g_sSQL_CheckData: %s", dbQuery);
-		/*FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], szName, g_iWarnings[iClient]);
-		hTxn.AddQuery(dbQuery);
-		if(g_bLogQuery)
-			LogQuery("LoadPlayerData::g_sSQL_UploadData: %s", dbQuery);
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, szName, g_iWarnings[iClient], g_iAccountID[iClient]);
-		hTxn.AddQuery(dbQuery);
-		if(g_bLogQuery)
-			LogQuery("LoadPlayerData::g_sSQL_UpdateData: %s", dbQuery);
-		g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 2); */
 	}
 }
 
@@ -285,7 +232,6 @@ public void SQL_CheckData(Database hDatabase, DBResultSet hDatabaseResults, cons
 	SQL_EscapeString(g_hDatabase, szName, sEscapedClientName, sizeof(sEscapedClientName));
 	if (hDatabaseResults.RowCount == 0) {
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient]);
-		//PrintToServer("%i %s %i", g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient]);
 		if(g_bLogQuery)
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
 		g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
@@ -338,12 +284,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	{
 		LogWarnings("[WarnSystem] SQL_LoadPlayerData - error while working with data (%s)", sError);
 		return;
-	}
-	
-	//while (hDatabaseResults.FetchRow())
-	
-	else if (hDatabaseResults.HasResults)
-	{
+	} else if (hDatabaseResults.HasResults) {
 		g_iWarnings[iClient] = hDatabaseResults.RowCount;
 		if (g_bPrintToAdmins && !g_bIsLateLoad)
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient]);
@@ -384,9 +325,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 		
 		// `account_id`, `username`, `warns`
 		
-		//FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayer, g_iServerID, sEscapedClientName, g_iAccountID[iClient], sEscapedAdminName, g_iAccountID[iAdmin], sEscapedReason, iTime);
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iTime, g_iWarnLength == 0 ? 0 : iTime + g_iWarnLength);
-		//g_hDatabase.Query(SQL_CheckError, dbQuery);
 		hTxn.AddQuery(dbQuery); // 0 transaction
 		if(g_bLogQuery)
 			LogQuery("WarnPlayer::g_sSQL_WarnPlayerW: %s", dbQuery);
@@ -489,7 +428,6 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		--g_iWarnings[iClient];
 		Transaction hTxn = new Transaction();
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerW, iID);
-		//g_hDatabase.Query(SQL_CheckError, dbQuery);
 		hTxn.AddQuery(dbQuery); // 0 transaction
 		if(g_bLogQuery)
 			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
@@ -620,9 +558,6 @@ public void CheckPlayerWarns(int iAdmin, int iClient)
 	{
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient]);
-		//LogWarnings(dbQuery);
-		//LogWarnings("iAdmin: %i AccountID[iAdmin]: %i  |   iClient: %i AccountID[iClient] %i", iAdmin, g_iAccountID[iAdmin], iClient, g_iAccountID[iClient]);
-		//LogWarnings("g_iWarnings[iClient]: %i  g_iWarnings[iAdmin]: %i", g_iWarnings[iClient], g_iWarnings[iAdmin]);
 		
 		Handle hCheckData = CreateDataPack(); 
 		WritePackCell(hCheckData, GetClientUserId(iAdmin));
@@ -659,54 +594,6 @@ public void SQL_GetInfoWarn(Database hDatabase, DBResultSet hDatabaseResults, co
 	
 	DisplayInfoAboutWarn(hDatabaseResults, iAdmin); // Transfer to menus.sp
 }
-
-/* public void SQL_CheckPlayerWarns(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hCheckData)
-{
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
-	{
-		LogWarnings("[WarnSystem] SQL_CheckPlayerWarns - error while working with data (%s)", sError);
-		return;
-	}
-	
-	int iAdmin, iClient;
-	
-	if(hCheckData)
-	{
-		iAdmin = GetClientOfUserId(ReadPackCell(hCheckData));
-		iClient = GetClientOfUserId(ReadPackCell(hCheckData));
-		CloseHandle(hCheckData); 
-	} else return;
-	
-	if (!hDatabaseResults.RowCount)
-	{
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
-		return;
-	}
-	
-	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
-	
-	char sClient[129], sAdmin[129], sReason[129], sTimeFormat[65];
-	int iDate, iExpired, i;
-	for (i = 0; i < 2; ++i) PrintToConsole(iAdmin, " ");
-	PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1s", "Player", "Admin", "Date", "Reason", "Expired");
-	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
-	//Ya, nice output
-	
-	while (hDatabaseResults.FetchRow())
-	{
-		SQL_FetchString(hDatabaseResults, 0, sClient, sizeof(sClient));
-		SQL_FetchString(hDatabaseResults, 1, sAdmin, sizeof(sAdmin));
-		SQL_FetchString(hDatabaseResults, 2, sReason, sizeof(sReason));
-		iDate = hDatabaseResults.FetchInt(3);
-		iExpired = hDatabaseResults.FetchInt(4);
-		
-		FormatTime(sTimeFormat, sizeof(sTimeFormat), "%Y-%m-%d %X", iDate);
-		PrintToConsole(iAdmin, "%-18s %-18s %-20s %-26s %-1i", sClient, sAdmin, sTimeFormat, sReason, iExpired);
-	}
-	PrintToConsole(iAdmin, "-----------------------------------------------------------------------------------------------------------");
-	for (i = 0; i < 2; ++i) PrintToConsole(iAdmin, " ");
-} */
 
 public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
