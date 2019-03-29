@@ -152,12 +152,12 @@ public void OnMapStart()
 public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {
-  IsClientInGame(iClient) &&
+  IsValidClient(iClient) &&
 	LoadPlayerData(iClient);
 }
 
 public void OnClientPutInServer(int iClient) {
-  IsClientAuthorized(iClient) &&
+  IsValidClient(iClient) &&
 	LoadPlayerData(iClient);
 }
 
