@@ -18,6 +18,7 @@
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
+#tryinclude <vip_core>
 #tryinclude <SteamWorks>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
