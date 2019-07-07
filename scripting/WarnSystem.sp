@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4.1"
+#define PLUGIN_VERSION      "1.4.2"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -263,4 +263,21 @@ stock void GetPort() { g_iPort=FindConVar("hostport").IntValue; }
 stock void GetIPServer() { 
 	int iHostIP = FindConVar("hostip").IntValue;
 	FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
+}
+
+stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
+{
+    AdminFlag aFlag;
+    int iFlags;
+
+    for (int i = 0; i < strlen(szFlagString); i++)
+    {
+        if(!FindFlagByChar(szFlagString[i], aFlag))     continue;
+        iFlags |= FlagToBit(aFlag);
+        if (GetUserFlagBits(iClient) & iFlags)
+        {
+            return true;
+        }
+    }
+    return false;
 }

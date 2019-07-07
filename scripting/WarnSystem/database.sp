@@ -377,6 +377,15 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
+		if(g_bRistictUnwarn)
+		{
+			if(!CheckAdminFlagsByString(iAdmin, g_sFlagUnRistict))
+			{
+				CPrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
+				return;
+			}
+		}
+
 		if (iAdmin == iClient)
 		{
 			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
@@ -461,11 +470,21 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
+		if(g_bRistictUnwarn)
+		{
+			if(!CheckAdminFlagsByString(iAdmin, g_sFlagUnRistict))
+			{
+				CPrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
+				return;
+			}
+		}
+
 		if (iAdmin == iClient)
 		{
 			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
 		}
+
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		

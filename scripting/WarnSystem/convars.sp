@@ -1,11 +1,11 @@
 ConVar g_hCvarMaxWarns, g_hCvarMaxPunishment, g_hCvarBanLength, g_hCvarPunishment, g_hCvarSlapDamage, g_hCvarPrintToAdmins,
         g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings, g_hCvarPrintToChat, g_hCvarDeleteExpired, 
-        g_hCharLogQuery, g_hCvarWarnLength;
+        g_hCharLogQuery, g_hCvarWarnLength, g_hCvarRistictUnwarn, g_hCvarFlagUnRistict;
 
 bool g_bResetWarnings, g_bWarnSound, g_bPrintToAdmins, g_bLogWarnings, g_bPrintToChat, g_bDeleteExpired,
-        g_bLogQuery;
+        g_bLogQuery, g_bRistictUnwarn;
 int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iSlapDamage, g_iWarnLength;
-char g_sWarnSoundPath[PLATFORM_MAX_PATH];
+char g_sWarnSoundPath[PLATFORM_MAX_PATH], g_sFlagUnRistict[22];
 
 public void InitializeConVars()
 {
@@ -25,6 +25,12 @@ public void InitializeConVars()
     (g_hCvarDeleteExpired = CreateConVar("sm_warns_delete_expired", "1", "Delete expired warnings of DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_DeleteExpired);
     (g_hCharLogQuery = CreateConVar("sm_warns_enable_querylog", "0", "Logging query to DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_LogQuery);
     (g_hCvarWarnLength = CreateConVar("sm_warns_warnlength", "86400", "Duration of the issued warning in seconds (0 - permanent).")).AddChangeHook(ChangeCvar_WarnLength);
+
+    g_hCvarRistictUnwarn = CreateConVar("sm_warns_ristict_unwarn", "0", "Ristiction unwarns and reset warns: (0 - unristict, 1 - ristict", _, true, 0.0, true, 1.0);
+    g_hCvarFlagUnRistict = CreateConVar("sm_warns_unristict_flags", "z", "Need flag to unristict unwarns (e.x. 'z').");
+
+    g_hCvarRistictUnwarn.AddChangeHook(ChangeCvar_Risticted);
+    g_hCvarFlagUnRistict.AddChangeHook(ChangeCvar_FlagUnRistict);
     
     AutoExecConfig(true, "core", "warnsystem");
 }
@@ -41,12 +47,14 @@ public void OnConfigsExecuted()
     
     g_bWarnSound = g_hCvarWarnSound.BoolValue;
     g_hCvarWarnSoundPath.GetString(g_sWarnSoundPath, sizeof(g_sWarnSoundPath));
+    g_hCvarFlagUnRistict.GetString(g_sFlagUnRistict, sizeof(g_sFlagUnRistict));
     
     g_bPrintToAdmins = g_hCvarPrintToAdmins.BoolValue;
     g_bPrintToChat = g_hCvarPrintToChat.BoolValue;
     g_bLogWarnings = g_hCvarLogWarnings.BoolValue;
     g_bLogQuery = g_hCharLogQuery.BoolValue;
     g_bDeleteExpired = g_hCvarDeleteExpired.BoolValue;
+    g_bRistictUnwarn = g_hCvarRistictUnwarn.BoolValue;
 }
 
 public void ChangeCvar_ResetWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bResetWarnings = convar.BoolValue;}
@@ -63,3 +71,5 @@ public void ChangeCvar_PrintToChat(ConVar convar, const char[] oldValue, const c
 public void ChangeCvar_LogWarnings(ConVar convar, const char[] oldValue, const char[] newValue){g_bLogWarnings = convar.BoolValue;}
 public void ChangeCvar_DeleteExpired(ConVar convar, const char[] oldValue, const char[] newValue){g_bDeleteExpired = convar.BoolValue;}
 public void ChangeCvar_LogQuery(ConVar convar, const char[] oldValue, const char[] newValue){g_bLogQuery = convar.BoolValue;}
+public void ChangeCvar_FlagUnRistict(ConVar convar, const char[] oldValue, const char[] newValue){ convar.GetString(g_sFlagUnRistict, sizeof(g_sFlagUnRistict));}
+public void ChangeCvar_Risticted(ConVar convar, const char[] oldValue, const char[] newValue){g_bRistictUnwarn = convar.BoolValue;}

@@ -36,8 +36,17 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 
 public Action Command_UnWarnPlayer(int iClient, int iArgs)
 {
-	if(GetUserFlagBits(iClient) || VIP_GetClientFeatureStatus(iClient, "Unwarns") == ENABLED)
+	if(VIP_GetClientFeatureStatus(iClient, "Unwarns") == ENABLED)
 	{
+		if(g_bRistictUnwarn)
+		{
+			if(!CheckAdminFlagsByString(iClient, g_sFlagUnRistict))
+			{
+				ReplyToCommand(iClient, " %t %t", "WS_Prefix", "No Access");
+				return Plugin_Handled;
+			}
+		}
+		
 		if (iArgs < 2)
 		{
 			ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_UnWarnArguments");
@@ -64,12 +73,21 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 
 public Action Command_WarnReset(int iClient, int iArgs)
 {
-	if(GetUserFlagBits(iClient) || VIP_GetClientFeatureStatus(iClient, "Resetwarns") == ENABLED)
+	if(VIP_GetClientFeatureStatus(iClient, "Resetwarns") == ENABLED)
 	{
 		if(!g_bResetWarnings)
 		{
 			ReplyToCommand(iClient, " %t %t", "WS_Prefix", "No Access");
 			return Plugin_Handled;
+		}
+
+		if(g_bRistictUnwarn)
+		{
+			if(!CheckAdminFlagsByString(iClient, g_sFlagUnRistict))
+			{
+				ReplyToCommand(iClient, " %t %t", "WS_Prefix", "No Access");
+				return Plugin_Handled;
+			}
 		}
 		if (iArgs < 2)
 		{
