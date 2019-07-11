@@ -226,23 +226,25 @@ public void SQL_CheckData(Database hDatabase, DBResultSet hDatabaseResults, cons
 		LogWarnings("[WarnSystem] SQL_CheckData - error while working with data (%s)", sError);
 		return;
 	}
-	
-	char dbQuery[513], szName[64], sEscapedClientName[129];
-	GetClientName(iClient, szName, sizeof(szName));
-	SQL_EscapeString(g_hDatabase, szName, sEscapedClientName, sizeof(sEscapedClientName));
-	if (hDatabaseResults.RowCount == 0) {
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient]);
-		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
-		g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
-		return;
-	}
-	else {
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, g_iAccountID[iClient], sEscapedClientName, g_iAccountID[iClient]);
-		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
-		g_hDatabase.Query(SQL_UpdateData, dbQuery, iClient);
-		return;
+	if(IsValidClient(iClient))
+	{
+		char dbQuery[513], szName[64], sEscapedClientName[129];
+		GetClientName(iClient, szName, sizeof(szName));
+		SQL_EscapeString(g_hDatabase, szName, sEscapedClientName, sizeof(sEscapedClientName));
+		if (hDatabaseResults.RowCount == 0) {
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient]);
+			if(g_bLogQuery)
+				LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
+			return;
+		}
+		else {
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, g_iAccountID[iClient], sEscapedClientName, g_iAccountID[iClient]);
+			if(g_bLogQuery)
+				LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			g_hDatabase.Query(SQL_UpdateData, dbQuery, iClient);
+			return;
+		}
 	}
 }
 
