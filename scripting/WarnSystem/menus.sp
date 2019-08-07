@@ -1,6 +1,40 @@
 Handle g_hAdminMenu;
 int g_iTarget[MAXPLAYERS+1];
 
+void ShowWarnMenu(int iClient)
+{
+	char szBuffer[128];
+
+	Menu hMenu = new Menu(OnWarnMenuDisplay);
+	hMenu.SetTitle("%T", "WS_WarnMenu");
+
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_AdminMenuWarnTitle", iClient);
+	hMenu.AddItem(NULL_STRING, szBuffer);
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_AdminMenuUnWarnTitle", iClient);
+	hMenu.AddItem(NULL_STRING, szBuffer);
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_AdminMenuResetWarnTitle", iClient);
+	hMenu.AddItem(NULL_STRING, szBuffer);
+
+	hMenu.Display(iClient, 0);
+}
+
+public int OnWarnMenuDisplay(Menu hMenu, MenuAction action, int iClient, int iItem)
+{
+	switch(action)
+	{
+		case MenuAction_End: hMenu.Close();
+		case MenuAction_Select:
+		{
+			switch(iItem)
+			{
+				case 0: DisplaySomeoneTargetMenu(iClient, MenuHandler_Warn);
+				case 1: DisplaySomeoneTargetMenu(iClient, MenuHandler_UnWarn);
+				case 2: DisplaySomeoneTargetMenu(iClient, MenuHandler_ResetWarn);
+			}
+		}
+	}
+}
+
 public void InitializeMenu(Handle hTopMenu)
 {
 	if (hTopMenu == g_hAdminMenu)

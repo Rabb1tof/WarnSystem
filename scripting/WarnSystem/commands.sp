@@ -1,9 +1,19 @@
 public void InitializeCommands()
 {
+	RegConsoleCmd("sm_warnmenu", Command_WarnMenu);
 	RegConsoleCmd("sm_warn", Command_WarnPlayer);
 	RegConsoleCmd("sm_unwarn", Command_UnWarnPlayer);
 	RegConsoleCmd("sm_checkwarn", Command_CheckWarnPlayer);
 	RegConsoleCmd("sm_resetwarn", Command_WarnReset);
+}
+
+public Action Command_WarnMenu(int iClient, int iArgs)
+{
+	if(IsValidClient && (GetUserFlagBits(iClient) & ADMFLAG_GENERIC | ADMFLAG_ROOT))
+	{
+		ShowWarnMenu(iClient);
+	}
+	return Plugin_Handled;
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)

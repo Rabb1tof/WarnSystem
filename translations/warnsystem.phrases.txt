@@ -173,6 +173,12 @@
     
     //-----------------------------------menus.sp------------------------------------
     
+    "WS_WarnMenu"
+    {
+        "ru"        "Меню системы предупреждений:"
+        "en"        "WarnSystem Menu:"
+    }
+
     "WS_AdminMenuOption"
     {
         "en"		"Warnings menu"
