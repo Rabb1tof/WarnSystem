@@ -3,14 +3,15 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4.2"
+#define PLUGIN_VERSION      "1.4.3"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
 #define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
 
-#include <colors>
+#include <morecolors>
+#include <csgo_colors>
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
@@ -168,11 +169,27 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 {
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
-		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
+		if (IsValidClient(i) && (GetUserFlagBits(i) & ADMFLAG_GENERIC))
 		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
-			CPrintToChat(i, "%s", sBuffer);
+			WS_PrintToChat(i, "%s", sBuffer);
 		}
+}
+
+stock void WS_PrintToChat(int iClient, const char[] szFormat, any ...)
+{
+	char szBuffer[255];
+	VFormat(szBuffer, sizeof(szBuffer), szFormat, 3);
+	if(g_bIsFuckingGame)	CGOPrintToChat(iClient, "%s", szBuffer);
+	else 					CPrintToChat(iClient, "%s", szBuffer);
+}
+
+stock void WS_PrintToChatAll(const char[] szFormat, any ...)
+{
+	char szBuffer[255];
+	VFormat(szBuffer, sizeof(szBuffer), szFormat, 2);
+	if(g_bIsFuckingGame)	CGOPrintToChatAll("%s", szBuffer);
+	else 					CPrintToChatAll("%s", szBuffer);
 }
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
@@ -209,18 +226,18 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 		switch (g_iPunishment)
 		{
 			case 1:
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			case 2:
 			{
 				if (IsPlayerAlive(iClient))
 					SlapPlayer(iClient, g_iSlapDamage, true);
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 3:
 			{
 				if (IsPlayerAlive(iClient))
 					ForcePlayerSuicide(iClient);
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 4: 
 				PunishmentSix(iClient, iAdmin, sReason);
@@ -255,7 +272,7 @@ public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 	if (IsPlayerAlive(iClient))
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient, iAdmin, szReason);
-	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+	WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }
 
 stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }

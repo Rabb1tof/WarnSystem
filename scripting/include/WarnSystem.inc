@@ -3,7 +3,7 @@
 #endif
 
 #define _warnsystem_included
-#define APIVERSION "1.4"
+#define APIVERSION "1.4.3"
 
 public SharedPlugin __pl_WarnSystem = {
     name = "WarnSystem",
@@ -88,6 +88,27 @@ native void WarnSystem_ResetWarn(int iClient, int iTarget, char sReason[129]);
  * @noreturn
  *********************************************************/
  native void WarnSystem_PrintToAdmins(char sMessage[256]);
+
+ /*********************************************************
+ * Launches the menu for the choice of the reason
+ *
+ * @param 	iClient     Index of client
+ * @param   callback    Function of callback
+ * @param   iType       check 
+ * @noreturn
+ *********************************************************/
+ native void WarnSystem_StartSelectReason(int iClient, int iVictim, ReasonSelectedHandler callback, int iType);
+
+/**
+* Special for iType (check down typedef)
+**/
+#define NONE 		0
+#define WARN 		1
+#define UNWARN 		2
+#define RESETWARN  	3
+#define UNKNOWN 	4
+
+typedef ReasonSelectedHandler = function void(int iClient, int iVictim, char szReason[129], int iType);
  
  /*********************************************************
  * Calling then client data loaded successfully

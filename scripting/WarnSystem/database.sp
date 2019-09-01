@@ -144,9 +144,8 @@ public void SQL_TransactionSuccefully(Database hDatabase, any data, int iNumQuer
 	FormatEx(szBuffer, sizeof(szBuffer), "[WarnSystem] Transaction '%s' succefully done.", szQuery);
 	PrintToServer(szBuffer);
 	PrintToServer("-----------------------------------------------------");
-	if(queryData[1] == 5) {
-		GetServerID(); PrintToServer("Debug");
-	}
+	if(queryData[1] == 5)
+		GetServerID();
 }
 
 public void SQL_TransactionFailed(Database hDatabase, any data, int iNumQueries, const char[] szError, int iFailIndex, any[] queryData)
@@ -304,11 +303,11 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
-		if (iAdmin == iClient)
+		/*if (iAdmin == iClient)
 		{
-			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}
+		}*/
 		char sEscapedAdminName[257], sEscapedClientName[257], sEscapedReason[259], 
 				dbQuery[257], TempNick[128];
 		int iTime = GetTime();
@@ -346,11 +345,11 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
 		if (g_bPrintToChat)
-			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
+			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
-			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
+			WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_WarnPlayerPersonal", iAdmin, sReason);
 		}
 		
 		if(g_bLogWarnings)
@@ -383,14 +382,14 @@ public void UnWarnPlayer(int iAdmin, int iClient, char sReason[129])
 		{
 			if(!CheckAdminFlagsByString(iAdmin, g_sFlagUnRistict))
 			{
-				CPrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
+				WS_PrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
 				return;
 			}
 		}
 
 		if (iAdmin == iClient)
 		{
-			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
 		}
 		
@@ -451,11 +450,11 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 3);
 		
 		if (g_bPrintToChat)
-			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
+			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
+			WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
 		}
 		
 		if (g_bLogWarnings)
@@ -463,7 +462,7 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		
 		WarnSystem_OnClientUnWarn(iAdmin, iClient, sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
+		WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------RESET WARNS---------------------------------------------------
@@ -476,14 +475,14 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 		{
 			if(!CheckAdminFlagsByString(iAdmin, g_sFlagUnRistict))
 			{
-				CPrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
+				WS_PrintToChat(iAdmin, "%t %t", "WS_ColoredPrefix", "No Access");
 				return;
 			}
 		}
 
 		if (iAdmin == iClient)
 		{
-			CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
+			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
 		}
 
@@ -557,18 +556,18 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 		//Delete data. Or make it expired?
 		
 		if (g_bPrintToChat)
-			CPrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
+			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
 		else
 		{
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_ResetPlayer", iAdmin, iClient, sReason);
-			CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
+			WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_ResetPlayerPersonal", iAdmin, sReason);
 		}
 		
 		WarnSystem_OnClientResetWarns(iAdmin, iClient, sReason);
 		if(g_bLogWarnings)
 			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) reseted warnings on PLAYER (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin] & 1, g_iAccountID[iAdmin] / 2, g_sClientIP[iAdmin], iClient, g_iAccountID[iAdmin] & 1, g_iAccountID[iAdmin] / 2, g_sClientIP[iClient], sReason);
 	} else
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
+		WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 }
 
 //----------------------------------------------------CHECK PLAYER WARNS---------------------------------------------------

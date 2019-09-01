@@ -12,6 +12,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("WarnSystem_GetPlayerWarns", Native_GetPlayerWarns);
 	CreateNative("WarnSystem_PrintToAdmins", Native_PrintToAdmins);
 	CreateNative("WarnSystem_GetMaxWarns", Native_GetMaxWarns);
+	CreateNative("WarnSystem_StartSelectReason", Native_StartSelectReason);
 	
 	g_hGFwd_OnClientLoaded = CreateGlobalForward("WarnSystem_OnClientLoaded", ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_String);
@@ -174,4 +175,48 @@ Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, cha
 	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;
+}
+
+typedef ReasonSelectedHandler = function void(int iClient, const char[] szReason, int iType);
+
+//void Native_StartSelectReason(int iClient, ReasonSelectedHandler ptrHandler, int iType = 0)
+public int Native_StartSelectReason(Handle hPlugin, int iNumParams)
+{
+	int iClient = GetNativeCell(1);
+	int iVictim = GetNativeCell(2);
+	Function ptrHandler = GetNativeFunction(3);
+	int iType = GetNativeCell(4);
+	DataPack hPack = new DataPack();
+	hPack.WriteCell(hPlugin);
+	hPack.WriteFunction(ptrHandler);
+	hPack.WriteCell(iType);
+	hPack.WriteCell(iVictim);
+
+	#define NONE 		0
+	#define WARN 		1
+	#define UNWARN 		2
+	#define RESETWARN  	3
+	#define UNKNOWN 	4
+
+	if(iType <= NONE && iType >= UNKNOWN) {
+		hPack.Close();
+		ThrowNativeError(SP_ERROR_PARAM, "[WarnSystem] 3th parameter (iType) is invalid! Check WarnSystem.inc.");
+	}
+	switch(iType)
+	{
+		case WARN: {
+			DisplayWarnReasons(iClient, hPack);
+		}
+		case UNWARN: {
+			DisplayUnWarnReasons(iClient, hPack);
+		}
+		case RESETWARN: {
+			DisplayResetWarnReasons(iClient, hPack);
+		}
+	}
+	#undef NONE 	
+	#undef WARN 
+	#undef UNWARN 	
+	#undef RESETWARN
+	#undef UNKNOWN
 }

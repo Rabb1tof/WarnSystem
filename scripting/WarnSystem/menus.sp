@@ -104,7 +104,7 @@ stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
 	for (int i = 1; i <= MaxClients; ++i)
-		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) /*&& iAdmin != i*/ && CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
@@ -228,7 +228,7 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 	}
 }
 
-public void DisplayWarnReasons(int iClient) 
+void DisplayWarnReasons(int iClient, DataPack hPack = null) 
 {
 	char sReason[129];
 	
@@ -247,16 +247,23 @@ public void DisplayWarnReasons(int iClient)
 		if (sReason[0])
 			AddMenuItem(hMenu, sReason, sReason);
 	}
+
+	if(hPack != null)
+	{
+		LogError("TEST::NULL");
+		IntToString(view_as<int>(hPack), sReason, sizeof(sReason));
+		hMenu.AddItem("hPack", sReason, ITEMDRAW_RAWLINE|ITEMDRAW_NOTEXT|ITEMDRAW_SPACER);
+	}
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
-public void DisplayUnWarnReasons(int iClient) 
+void DisplayUnWarnReasons(int iClient, DataPack hPack = null) 
 {
 	char sReason[129];
 	
-	Menu hMenu = new Menu(MenuHandler_PreformUnWarn);
+	Menu hMenu = new Menu(MenuHandler_PreformUnWarn, MENU_ACTIONS_DEFAULT|MenuAction_DrawItem);
 	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
@@ -271,16 +278,22 @@ public void DisplayUnWarnReasons(int iClient)
 		if (sReason[0])
 			AddMenuItem(hMenu, sReason, sReason);
 	}
+
+	if(hPack != null)
+	{
+		IntToString(view_as<int>(hPack), sReason, sizeof(sReason));
+		AddMenuItem(hMenu, "hPack", sReason, ITEMDRAW_IGNORE);
+	}
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
-public void DisplayResetWarnReasons(int iClient) 
+void DisplayResetWarnReasons(int iClient, DataPack hPack = null) 
 {
 	char sReason[129];
 	
-	Menu hMenu = new Menu(MenuHandler_PreformResetWarn);
+	Menu hMenu = new Menu(MenuHandler_PreformResetWarn, MENU_ACTIONS_DEFAULT|MenuAction_DrawItem);
 	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	
@@ -295,6 +308,12 @@ public void DisplayResetWarnReasons(int iClient)
 		if (sReason[0])
 			AddMenuItem(hMenu, sReason, sReason);
 	}
+
+	if(hPack != null)
+	{
+		IntToString(view_as<int>(hPack), sReason, sizeof(sReason));
+		AddMenuItem(hMenu, "hPack", sReason, ITEMDRAW_IGNORE);
+	}
 	
 	CloseHandle(hFilePath);
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -306,8 +325,28 @@ public int MenuHandler_PreformWarn(Handle menu, MenuAction action, int param1, i
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
+			char sInfo[129], sBuffer[20], szBuffer[129];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+			for(int i = 0, size = GetMenuItemCount(menu); i < size; ++i) {
+				GetMenuItem(menu, i, sBuffer, sizeof(sBuffer), _, szBuffer, sizeof(szBuffer));
+				if(StrEqual(sBuffer, "hPack"))
+				{
+					LogError("TEST::FALSE");
+					DataPack hPack = view_as<DataPack>(StringToInt(szBuffer));
+					if(hPack == INVALID_HANDLE)	continue;
+					hPack.Reset();
+					Handle hPlugin = hPack.ReadCell();
+					Call_StartFunction(hPlugin, hPack.ReadFunction());
+					Call_PushCell(param1); 				// client
+					Call_PushCell(hPack.ReadCell()); 	// victim
+					Call_PushString(sInfo); 			// select reason
+					Call_PushCell(hPack.ReadCell()); 	// type of reason
+					Call_Finish();
+
+					hPack.Close();
+					return;				
+				}
+			}
 			WarnPlayer(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
@@ -327,6 +366,20 @@ public int MenuHandler_PreformUnWarn(Handle menu, MenuAction action, int param1,
 		{
 			char sInfo[129];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+			if(StrEqual(sInfo, "hPack"))
+			{
+				DataPack hPack = view_as<DataPack>(StringToInt(sInfo));
+				hPack.Reset();
+				Handle hPlugin = hPack.ReadCell();
+				Call_StartFunction(hPlugin, hPack.ReadFunction());
+				Call_PushCell(param1); 				// client
+				Call_PushCell(hPack.ReadCell()); 	// victim
+				Call_PushString(sInfo); 			// select reason
+				Call_PushCell(hPack.ReadCell()); 	// type of reason
+				Call_Finish();
+
+				hPack.Close();				
+			}
 			UnWarnPlayer(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
@@ -346,6 +399,20 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 		{
 			char sInfo[129];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
+			if(StrEqual(sInfo, "hPack"))
+			{
+				DataPack hPack = view_as<DataPack>(StringToInt(sInfo));
+				hPack.Reset();
+				Handle hPlugin = hPack.ReadCell();
+				Call_StartFunction(hPlugin, hPack.ReadFunction());
+				Call_PushCell(param1); 				// client
+				Call_PushCell(hPack.ReadCell()); 	// victim
+				Call_PushString(sInfo); 			// select reason
+				Call_PushCell(hPack.ReadCell()); 	// type of reason
+				Call_Finish();
+
+				hPack.Close();				
+			}
 			ResetPlayerWarns(param1, g_iTarget[param1], sInfo);
 		}
 		case MenuAction_Cancel:
