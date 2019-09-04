@@ -118,7 +118,8 @@ public void InitializeDatabase()
 			g_hDatabase.SetCharset("utf8");
 			Transaction hTxn = new Transaction();
 			hTxn.AddQuery(g_sSQL_CreateTablePlayers_MySQL); // 0
-			hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
+			if(!g_bSeparationDB)
+				hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
 			hTxn.AddQuery(g_sSQL_CreateTableWarns_MySQL); // 2
 			g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
 		} else
@@ -144,7 +145,7 @@ public void SQL_TransactionSuccefully(Database hDatabase, any data, int iNumQuer
 	FormatEx(szBuffer, sizeof(szBuffer), "[WarnSystem] Transaction '%s' succefully done.", szQuery);
 	PrintToServer(szBuffer);
 	PrintToServer("-----------------------------------------------------");
-	if(queryData[1] == 5)
+	if(queryData[1] == 5 && !g_bSeparationDB)
 		GetServerID();
 }
 
