@@ -13,7 +13,7 @@ public void InitializeConVars()
     (g_hCvarResetWarnings = CreateConVar("sm_warns_resetwarnings", "0", "Delete warns then player reach max warns: 0 - Keep warns(set it expired), 1 - Delete warns", _, true, 0.0, true, 1.0)).AddChangeHook(ChangeCvar_ResetWarnings);
     (g_hCvarMaxWarns = CreateConVar("sm_warns_maxwarns", "3", "Max warnings before punishment", _, true, 1.0, true, 10.0)).AddChangeHook(ChangeCvar_MaxWarns);
     (g_hCvarPunishment = CreateConVar("sm_warns_punishment", "4", "On warn: 1 - message player, 2 - slap player and message, 3 - slay player and message, 4 - Popup agreement and message, 5 - kick player with reason, 6 - ban player with reason, 7 - ban(or do something) with module", _, true, 1.0, true, 7.0)).AddChangeHook(ChangeCvar_Punishment);
-    (g_hCvarMaxPunishment = CreateConVar("sm_warns_maxpunishment", "1", "On max warns: 1 - kick, 2 - ban, 3 - ban(or do something) with module", _, true, 1.0, true, 3.0)).AddChangeHook(ChangeCvar_MaxPunishment);
+    (g_hCvarMaxPunishment = CreateConVar("sm_warns_maxpunishment", "1", "On max warns: 1 - kick, 2 - ban, 3 - ban(or do something) with module, 4 - nothing", _, true, 1.0, true, 4.0)).AddChangeHook(ChangeCvar_MaxPunishment);
     (g_hCvarBanLength = CreateConVar("sm_warns_banlength", "60", "Time to ban target(minutes): 0 - permanent")).AddChangeHook(ChangeCvar_BanLength);
     (g_hCvarSlapDamage = CreateConVar("sm_warns_slapdamage", "0", "Slap player with damage: 0 - no damage", _, true, 0.0, true, 300.0)).AddChangeHook(ChangeCvar_SlapDamage);
     

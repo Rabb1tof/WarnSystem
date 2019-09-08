@@ -59,6 +59,8 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sSQL_UpdateData[] = "UPDATE `ws_player` SET `warns` = ( SELECT COUNT(*) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0' ), `username` = '%s' WHERE `account_id` = '%i';",
 	g_sSQL_UnwarnPlayerW[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `warn_id` = '%i';",
 	g_sSQL_UnwarnPlayerP[] = "UPDATE `ws_player` SET `username` = '%s', `warns` = '%i' WHERE `account_id` = '%i';",
+	g_sSQL_AllUnwarns[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `client_id` = '%i';\
+						   UPDATE `ws_player` SET `warns` = '0' WHERE `account_id` = '%i';",
 	g_sSQL_CheckPlayerWarns[] = "SELECT \
 	`ws_warn`.`warn_id`, \
 	`ws_warn`.`client_id`, \
@@ -118,8 +120,7 @@ public void InitializeDatabase()
 			g_hDatabase.SetCharset("utf8");
 			Transaction hTxn = new Transaction();
 			hTxn.AddQuery(g_sSQL_CreateTablePlayers_MySQL); // 0
-			if(!g_bSeparationDB)
-				hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
+			hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
 			hTxn.AddQuery(g_sSQL_CreateTableWarns_MySQL); // 2
 			g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
 		} else
@@ -621,3 +622,19 @@ public void SQL_CheckError(Database hDatabase, DBResultSet hDatabaseResults, con
 	if (hDatabaseResults == INVALID_HANDLE || sError[0])
 		LogWarnings("[WarnSystem] SQL_CheckError: %s", sError);
 }
+
+//------------------------------------------------ REMOVE ALL WARNS ----------------------------------------------------------
+
+void RemoveWarns(int iClient)
+{
+	char szQuery[512];
+
+	FormatEx(szQuery, sizeof(szQuery), g_sSQL_AllUnwarns, g_iAccountID[iClient], g_iAccountID[iClient]);
+	g_hDatabase.Query(SQL_CheckError, szQuery);
+}
+
+/*public void SQL_AllUnwarns(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
+{
+	if (hDatabaseResults == INVALID_HANDLE || sError[0])
+		LogWarnings("[WarnSystem] SQL_AllUnwarns: %s", sError);
+}*/

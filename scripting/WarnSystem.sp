@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4.3.1"
+#define PLUGIN_VERSION      "1.4.3.2"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -196,7 +196,7 @@ stock void WS_PrintToChatAll(const char[] szFormat, any ...)
 
 public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
 {
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient)) {
 		switch (g_iMaxPunishment)
 		{
 			case 1:
@@ -217,7 +217,15 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
 					KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
 				}
 			}
+
+			default:
+			{
+				RemoveWarns(iClient);
+				return;
+			}
 		}
+		RemoveWarns(iClient);
+	}
 }
 
 public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
