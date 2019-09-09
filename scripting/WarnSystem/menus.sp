@@ -125,9 +125,9 @@ public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -155,9 +155,9 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -184,9 +184,9 @@ public int MenuHandler_ResetWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -213,9 +213,9 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 				CheckPlayerWarns(param1, iTarget);
 		}
@@ -250,7 +250,7 @@ void DisplayWarnReasons(int iClient, DataPack hPack = null)
 
 	if(hPack != null)
 	{
-		LogError("TEST::NULL");
+		//LogError("TEST::NULL");
 		IntToString(view_as<int>(hPack), sReason, sizeof(sReason));
 		hMenu.AddItem("hPack", sReason, ITEMDRAW_RAWLINE|ITEMDRAW_NOTEXT|ITEMDRAW_SPACER);
 	}
@@ -331,7 +331,7 @@ public int MenuHandler_PreformWarn(Handle menu, MenuAction action, int param1, i
 				GetMenuItem(menu, i, sBuffer, sizeof(sBuffer), _, szBuffer, sizeof(szBuffer));
 				if(StrEqual(sBuffer, "hPack"))
 				{
-					LogError("TEST::FALSE");
+					//LogError("TEST::FALSE");
 					DataPack hPack = view_as<DataPack>(StringToInt(szBuffer));
 					if(hPack == INVALID_HANDLE)	continue;
 					hPack.Reset();
@@ -364,21 +364,27 @@ public int MenuHandler_PreformUnWarn(Handle menu, MenuAction action, int param1,
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
+			char sInfo[129], sBuffer[20], szBuffer[129];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			if(StrEqual(sInfo, "hPack"))
-			{
-				DataPack hPack = view_as<DataPack>(StringToInt(sInfo));
-				hPack.Reset();
-				Handle hPlugin = hPack.ReadCell();
-				Call_StartFunction(hPlugin, hPack.ReadFunction());
-				Call_PushCell(param1); 				// client
-				Call_PushCell(hPack.ReadCell()); 	// victim
-				Call_PushString(sInfo); 			// select reason
-				Call_PushCell(hPack.ReadCell()); 	// type of reason
-				Call_Finish();
+			for(int i = 0, size = GetMenuItemCount(menu); i < size; ++i) {
+				GetMenuItem(menu, i, sBuffer, sizeof(sBuffer), _, szBuffer, sizeof(szBuffer));
+				if(StrEqual(sBuffer, "hPack"))
+				{
+					//LogError("TEST::FALSE");
+					DataPack hPack = view_as<DataPack>(StringToInt(szBuffer));
+					if(hPack == INVALID_HANDLE)	continue;
+					hPack.Reset();
+					Handle hPlugin = hPack.ReadCell();
+					Call_StartFunction(hPlugin, hPack.ReadFunction());
+					Call_PushCell(param1); 				// client
+					Call_PushCell(hPack.ReadCell()); 	// victim
+					Call_PushString(sInfo); 			// select reason
+					Call_PushCell(hPack.ReadCell()); 	// type of reason
+					Call_Finish();
 
-				hPack.Close();				
+					hPack.Close();
+					return;				
+				}
 			}
 			UnWarnPlayer(param1, g_iTarget[param1], sInfo);
 		}
@@ -397,21 +403,27 @@ public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int para
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
+			char sInfo[129], sBuffer[20], szBuffer[129];
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			if(StrEqual(sInfo, "hPack"))
-			{
-				DataPack hPack = view_as<DataPack>(StringToInt(sInfo));
-				hPack.Reset();
-				Handle hPlugin = hPack.ReadCell();
-				Call_StartFunction(hPlugin, hPack.ReadFunction());
-				Call_PushCell(param1); 				// client
-				Call_PushCell(hPack.ReadCell()); 	// victim
-				Call_PushString(sInfo); 			// select reason
-				Call_PushCell(hPack.ReadCell()); 	// type of reason
-				Call_Finish();
+			for(int i = 0, size = GetMenuItemCount(menu); i < size; ++i) {
+				GetMenuItem(menu, i, sBuffer, sizeof(sBuffer), _, szBuffer, sizeof(szBuffer));
+				if(StrEqual(sBuffer, "hPack"))
+				{
+					//LogError("TEST::FALSE");
+					DataPack hPack = view_as<DataPack>(StringToInt(szBuffer));
+					if(hPack == INVALID_HANDLE)	continue;
+					hPack.Reset();
+					Handle hPlugin = hPack.ReadCell();
+					Call_StartFunction(hPlugin, hPack.ReadFunction());
+					Call_PushCell(param1); 				// client
+					Call_PushCell(hPack.ReadCell()); 	// victim
+					Call_PushString(sInfo); 			// select reason
+					Call_PushCell(hPack.ReadCell()); 	// type of reason
+					Call_Finish();
 
-				hPack.Close();				
+					hPack.Close();
+					return;				
+				}
 			}
 			ResetPlayerWarns(param1, g_iTarget[param1], sInfo);
 		}
@@ -459,7 +471,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 {
 	if (action == MenuAction_Select)
 	{
-		CPrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
+		WS_PrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
 		if (IsPlayerAlive(param1))
 			SetEntityMoveType(param1, MOVETYPE_WALK);
 	} else if (action == MenuAction_End)
@@ -482,7 +494,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	if (!hDatabaseResults.RowCount)
 	{
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
+		WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
