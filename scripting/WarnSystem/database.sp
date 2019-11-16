@@ -44,7 +44,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
   `server_id` smallint(6) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор сервера',\
   `address` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0' COMMENT 'IP-адрес сервера',\
   `port` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Порт сервера',\
-  PRIMARY KEY (`server_id`),\
+  UNIQUE KEY (`server_id`),\
   UNIQUE KEY `ws_servers_address_port` (`address`,`port`)\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Перечень серверов';",
 	g_sSQL_GetServerID[] = "SELECT `server_id` FROM `ws_server` WHERE `address` = '%s' AND `port` = '%i';",
@@ -59,8 +59,8 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sSQL_UpdateData[] = "UPDATE `ws_player` SET `warns` = ( SELECT COUNT(*) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0' ), `username` = '%s' WHERE `account_id` = '%i';",
 	g_sSQL_UnwarnPlayerW[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `warn_id` = '%i';",
 	g_sSQL_UnwarnPlayerP[] = "UPDATE `ws_player` SET `username` = '%s', `warns` = '%i' WHERE `account_id` = '%i';",
-	g_sSQL_AllUnwarns[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `client_id` = '%i';\
-						   UPDATE `ws_player` SET `warns` = '0' WHERE `account_id` = '%i';",
+	g_sSQL_AllUnwarnsW[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `client_id` = '%i';",
+	g_sSQL_AllUnwarnsP[] = "UPDATE `ws_player` SET `warns` = '0' WHERE `account_id` = '%i';",
 	g_sSQL_CheckPlayerWarns[] = "SELECT \
 	`ws_warn`.`warn_id`, \
 	`ws_warn`.`client_id`, \
@@ -629,7 +629,10 @@ void RemoveWarns(int iClient)
 {
 	char szQuery[512];
 
-	FormatEx(szQuery, sizeof(szQuery), g_sSQL_AllUnwarns, g_iAccountID[iClient], g_iAccountID[iClient]);
+	FormatEx(szQuery, sizeof(szQuery), g_sSQL_AllUnwarnsW, g_iAccountID[iClient]);
+	g_hDatabase.Query(SQL_CheckError, szQuery);
+
+	FormatEx(szQuery, sizeof(szQuery), g_sSQL_AllUnwarnsP, g_iAccountID[iClient]);
 	g_hDatabase.Query(SQL_CheckError, szQuery);
 }
 

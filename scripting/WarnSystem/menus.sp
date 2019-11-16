@@ -6,7 +6,7 @@ void ShowWarnMenu(int iClient)
 	char szBuffer[128];
 
 	Menu hMenu = new Menu(OnWarnMenuDisplay);
-	hMenu.SetTitle("%T", "WS_WarnMenu");
+	hMenu.SetTitle("%T", "WS_WarnMenu", iClient);
 
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_AdminMenuWarnTitle", iClient);
 	hMenu.AddItem(NULL_STRING, szBuffer);
