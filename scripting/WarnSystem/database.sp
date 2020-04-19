@@ -18,7 +18,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
   `reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',\
   `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
   `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
-  `deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
+  `deleted` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Истекло ли предупреждение 1 - да',\
   PRIMARY KEY (`warn_id`),\
   KEY `FK_ws_warn_ws_server` (`server_id`),\
   KEY `FK_ws_warn_ws_admin` (`admin_id`),\
